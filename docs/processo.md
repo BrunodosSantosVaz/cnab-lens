@@ -382,9 +382,9 @@ bloqueiam force push e exclusão. O ambiente `producao` exige a aprovação do d
 
 ## Limites conhecidos da automação
 
-- **Os botões só existem depois que o workflow está na `main`.** O GitHub só oferece o *Run workflow* de
-  arquivos presentes na branch padrão; enquanto uma etapa nova só está na `develop`, ela dispara apenas
-  por `--ref develop`. Na primeira publicação com a esteira nova, os botões passam a existir.
+- **Um botão novo só existe depois que o workflow está na `main`.** O GitHub só oferece o *Run workflow* de
+  arquivos presentes na branch padrão. Ao criar uma etapa nova, ela só passa a poder ser disparada depois do
+  merge na `main` (antes disso, apenas por `--ref develop` e só para workflows que já existem na `main`).
 - **Cartão movido à mão não dispara nada.** Projects de usuário não emitem eventos: por isso o portão da
   produção **lê o painel** na hora, e *Reprovado* volta pela ação *Criar branches*, não por um evento.
 - **PR de fork roda sem segredos.** O Kanban depende do `PROJETO_TOKEN`, que o GitHub não entrega a workflows
@@ -394,7 +394,5 @@ bloqueiam force push e exclusão. O ambiente `producao` exige a aprovação do d
 - **Issue de layout não vira cartão sozinha.** O Kanban só reconhece `epic`, `task` e `bug`.
 - **CI do primeiro PR.** O GitHub pode exigir a aprovação do mantenedor antes de rodar o CI do primeiro PR de
   quem é novo no projeto (Settings → Actions → General).
-- **`Publicar sem executável` também só existe depois de estar na `main`.** Na primeira vez a `main` é avançada uma vez
-  à mão até a `develop` (o que a ação faria); a partir daí o botão passa a existir.
 - **Aprovar é humano.** A esteira nunca aprova PR, cartão nem o ambiente `producao` por você.
 - **Sem candidata, sem produção.** Sem `vX.Y.Z-rc.N` da versão, ou com o código alterado depois dela, o portão recusa.
