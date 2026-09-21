@@ -1,0 +1,36 @@
+name: Épico
+description: Ideia ou iniciativa grande, que será quebrada em tarefas
+labels: ["epic"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema / oportunidade
+      description: Qual dor ou ganho? Para quem? Por que agora?
+    validations:
+      required: true
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo e resultado esperado
+      description: Como saberemos que deu certo?
+    validations:
+      required: true
+  - type: textarea
+    id: escopo
+    attributes:
+      label: Escopo (dentro e fora)
+  - type: textarea
+    id: regras
+    attributes:
+      label: Regras de negócio e decisões já tomadas
+  - type: textarea
+    id: riscos
+    attributes:
+      label: Riscos e dependências
+  - type: textarea
+    id: tarefas
+    attributes:
+      label: Tarefas previstas
+      description: "Uma por linha, cada uma cabendo em um PR pequeno. O botão Iniciar sprint cria uma tarefa (issue) para cada item, ligada a este épico."
+      value: "- [ ] \n- [ ] "

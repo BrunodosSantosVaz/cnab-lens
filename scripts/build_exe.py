@@ -1,0 +1,105 @@
+# -*- coding: utf-8 -*-
+"""Gera o executável Windows e guarda uma cópia versionada em releases/.
+
+    python scripts/build_exe.py                    # build-local/ (ignorada pelo git)
+    python scripts/build_exe.py --saida PASTA      # outra pasta
+    python scripts/build_exe.py --rc 2 --saida rc  # release candidata: CNABLens-v<versão>-rc.2-...
+
+As cópias de releases/ e os arquivos das Releases do GitHub são gerados pelo CI (workflows
+"Build release candidata" e "Publicar release"), não à mão.
+
+Requer Python 3.10+ (com Tkinter) e PyInstaller (`pip install -r requirements-build.txt`).
+Resultado, na pasta de saída:
+    CNABLens-v<versão>[-rc.N]-windows-x64.exe
+    SHA256SUMS.txt          (hash para conferir o download)
+A versão vem de src/version.py e é a mesma dentro do .exe em candidata ou final: o sufixo -rc.N só
+aparece no nome do arquivo, para que o binário aprovado em homologação seja exatamente o que vai para
+produção. Arquivos temporários do PyInstaller ficam fora do repositório.
+"""
+import argparse
+import hashlib
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = os.path.join(RAIZ, "src")
+sys.path.insert(0, SRC)
+from version import __version__  # noqa: E402
+
+NOME = "CNABLens"
+DESCRICAO = "CNABLens: lente para arquivos CNAB400 e CNAB240 (remessa e retorno de cobrança)"
+COPYRIGHT = "MIT License"
+
+
+def arquivo_versao_windows(pasta):
+    """Metadados que aparecem em Propriedades > Detalhes do .exe."""
+    partes = (__version__.split(".") + ["0", "0", "0"])[:3]
+    tupla = ", ".join(partes + ["0"])
+    texto = f"""VSVersionInfo(
+  ffi=FixedFileInfo(filevers=({tupla}), prodvers=({tupla}), mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0, date=(0, 0)),
+  kids=[
+    StringFileInfo([StringTable('041604B0', [
+      StringStruct('FileDescription', '{DESCRICAO}'),
+      StringStruct('FileVersion', '{__version__}'),
+      StringStruct('InternalName', '{NOME}'),
+      StringStruct('LegalCopyright', '{COPYRIGHT}'),
+      StringStruct('OriginalFilename', '{NOME}.exe'),
+      StringStruct('ProductName', 'CNABLens'),
+      StringStruct('ProductVersion', '{__version__}')])]),
+    VarFileInfo([VarStruct('Translation', [1046, 1200])])
+  ])
+"""
+    caminho = os.path.join(pasta, "version_info.txt")
+    with open(caminho, "w", encoding="utf-8") as f:
+        f.write(texto)
+    return caminho
+
+
+def nome_do_arquivo(rc=None):
+    """Nome do .exe: CNABLens-v0.2.0-windows-x64.exe (produção) ou CNABLens-v0.2.0-rc.1-windows-x64.exe."""
+    sufixo = f"-rc.{int(rc)}" if rc else ""
+    return f"{NOME}-v{__version__}{sufixo}-windows-x64.exe"
+
+
+def sha256(caminho):
+    h = hashlib.sha256()
+    with open(caminho, "rb") as f:
+        for bloco in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(bloco)
+    return h.hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Compila o CNABLens e guarda o .exe com o hash SHA-256.")
+    parser.add_argument("--saida", help="pasta de destino (padrão: build-local/)")
+    parser.add_argument("--rc", type=int, help="número da release candidata (vira -rc.N no nome do arquivo)")
+    args = parser.parse_args()
+    destino_pasta = os.path.abspath(args.saida) if args.saida else os.path.join(RAIZ, "build-local")
+    nome_final = nome_do_arquivo(args.rc)
+    with tempfile.TemporaryDirectory(prefix="cnab-build-") as tmp:
+        cmd = [
+            sys.executable, "-m", "PyInstaller", "--onefile", "--windowed", "--clean", "--noconfirm",
+            "--name", NOME, "--version-file", arquivo_versao_windows(tmp),
+            "--distpath", os.path.join(tmp, "dist"), "--workpath", os.path.join(tmp, "work"), "--specpath", tmp,
+            "--paths", SRC, os.path.join(SRC, "cnab400_reader.py"),
+        ]
+        print(" ".join(cmd))
+        subprocess.run(cmd, check=True, cwd=SRC)
+        gerado = os.path.join(tmp, "dist", NOME + ".exe")
+        os.makedirs(destino_pasta, exist_ok=True)
+        for antigo in os.listdir(destino_pasta):  # nunca deixar .exe/hash de builds anteriores misturados
+            if antigo.endswith(".exe") or antigo == "SHA256SUMS.txt":
+                os.remove(os.path.join(destino_pasta, antigo))
+        final = os.path.join(destino_pasta, nome_final)
+        shutil.copyfile(gerado, final)
+    with open(os.path.join(destino_pasta, "SHA256SUMS.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(f"{sha256(final)}  {nome_final}\n")
+    print(f"\nOK: {os.path.relpath(final, RAIZ)}  ({os.path.getsize(final) / 1e6:.1f} MB)")
+    print(f"SHA-256: {sha256(final)}")
+
+
+if __name__ == "__main__":
+    main()

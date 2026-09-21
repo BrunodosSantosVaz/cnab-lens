@@ -1,0 +1,17 @@
+# Categorias das notas geradas pela GitHub Release (quando usado --generate-notes).
+# Usa as labels dos PRs (pr-regras.yml etiqueta feature como "task" e bugfix/hotfix como "bug").
+changelog:
+  exclude:
+    labels: [ignore-for-release]
+    authors: [dependabot]
+  categories:
+    - title: "Novidades"
+      labels: [task, enhancement]
+    - title: "Layouts e bancos"
+      labels: [layout]
+    - title: "Correções"
+      labels: [bug]
+    - title: "Documentação"
+      labels: [documentation]
+    - title: "Outras mudanças"
+      labels: ["*"]

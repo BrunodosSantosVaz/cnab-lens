@@ -1,0 +1,25 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dúvida sobre o uso do CNABLens ou sobre um layout? Conte o que você fez e o que esperava.
+        **Não anexe arquivos CNAB reais** (têm nomes, CPF/CNPJ e valores de terceiros). Troque por dados fictícios
+        ou descreva só as posições e os valores envolvidos. Para reportar um erro concreto, use as
+        [Issues](../issues/new/choose).
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do CNABLens
+      placeholder: "Ex.: 0.1.0 (aparece no título da janela)"
+  - type: input
+    id: banco
+    attributes:
+      label: Banco / cooperativa e formato
+      placeholder: "Ex.: Sicoob (756), CNAB240 retorno"
+  - type: textarea
+    id: duvida
+    attributes:
+      label: Sua dúvida
+      description: O que você tentou e o que aconteceu.
+    validations:
+      required: true

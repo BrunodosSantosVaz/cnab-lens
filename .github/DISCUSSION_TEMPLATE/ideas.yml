@@ -1,0 +1,21 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tem uma ideia de melhoria ou de um banco novo? Explique o **problema** que ela resolve.
+        Se já for um pedido concreto de layout, o formulário **Layout ou banco** nas [Issues](../issues/new/choose)
+        é o caminho. **Não anexe arquivos CNAB reais.**
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema você quer resolver?
+    validations:
+      required: true
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Como você imagina a solução?
+  - type: input
+    id: banco
+    attributes:
+      label: Banco / formato relacionado (se houver)

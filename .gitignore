@@ -1,0 +1,24 @@
+# Ambiente virtual e caches do Python
+.venv/
+__pycache__/
+*.pyc
+
+# Arquivos temporários do PyInstaller (o build_exe.py já os gera fora do repositório)
+build/
+dist/
+*.spec
+
+# Arquivos CNAB reais de exemplo/teste: contêm dados de clientes (nomes, CPF/CNPJ,
+# valores). NUNCA versionar. Use os arquivos fictícios de exemplos/.
+arquivos/
+
+# Editores e sistema operacional
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Saída padrão do scripts/build_exe.py (builds locais)
+build-local/
+rc/
+tarefa/

@@ -1,0 +1,99 @@
+# -*- coding: utf-8 -*-
+"""Consistência das tabelas de layout e do registro de layouts."""
+import unittest
+
+import _caminho  # noqa: F401
+import cnab240_layout_sicoob as sicoob240
+import cnab400_layout as febraban
+import cnab400_layout_sicoob as sicoob400
+import cnab400_layout_sicredi as sicredi
+import cnab400_layouts as layouts
+
+MODULOS = [(febraban, 400), (sicredi, 400), (sicoob400, 400), (sicoob240, 240)]
+
+
+def listas_de_campos(modulo):
+    return [(nome, valor) for nome, valor in vars(modulo).items()
+            if nome.endswith("_FIELDS") and isinstance(valor, list)]
+
+
+class TabelasDeCampos(unittest.TestCase):
+    def test_todas_as_listas_cobrem_todas_as_posicoes_sem_lacuna(self):
+        for modulo, largura in MODULOS:
+            for nome, campos in listas_de_campos(modulo):
+                with self.subTest(modulo=modulo.__name__, lista=nome):
+                    esperado = 1
+                    for campo in campos:
+                        self.assertEqual(len(campo), 4, campo)
+                        titulo, inicio, fim, descricao = campo
+                        self.assertTrue(titulo and descricao, campo)
+                        self.assertEqual(inicio, esperado, f"{titulo}: começa em {inicio}, esperado {esperado}")
+                        self.assertGreaterEqual(fim, inicio, titulo)
+                        esperado = fim + 1
+                    self.assertEqual(esperado, largura + 1, f"termina em {esperado - 1}")
+
+    def test_ha_listas_em_cada_modulo(self):
+        for modulo, _ in MODULOS:
+            self.assertTrue(listas_de_campos(modulo), modulo.__name__)
+
+    def test_segmentos_240_apontam_para_listas_existentes(self):
+        for (tipo, letra), campos in sicoob240.SEGMENTOS.items():
+            with self.subTest(tipo=tipo, segmento=letra):
+                self.assertIn(tipo, ("Remessa", "Retorno"))
+                self.assertEqual(len(letra), 1)
+                self.assertEqual(campos[0][1], 1)
+
+
+class ResumoDaGrade(unittest.TestCase):
+    """A grade de lançamentos localiza colunas por trecho do nome do campo:
+    todo layout precisa ter vencimento, valor e ocorrência/comando."""
+
+    def detalhes(self):
+        yield "febraban/Remessa", febraban.DETAIL_REMESSA_FIELDS
+        yield "febraban/Retorno", febraban.DETAIL_RETORNO_FIELDS
+        yield "sicredi/Remessa", sicredi.DETAIL_REMESSA_FIELDS
+        yield "sicredi/Retorno", sicredi.DETAIL_RETORNO_FIELDS
+        yield "sicoob400/Remessa", sicoob400.DETAIL_REMESSA_FIELDS
+        yield "sicoob400/Retorno", sicoob400.DETAIL_RETORNO_FIELDS
+        yield "sicoob240/Remessa", sicoob240.SEGMENTO_P_REMESSA_FIELDS
+        yield "sicoob240/Retorno", sicoob240.SEGMENTO_T_RETORNO_FIELDS
+
+    def test_campos_essenciais_presentes(self):
+        for rotulo, campos in self.detalhes():
+            nomes = " | ".join(c[0].lower() for c in campos)
+            with self.subTest(layout=rotulo):
+                self.assertIn("data de vencimento", nomes)
+                self.assertTrue("valor nominal" in nomes or "valor do título" in nomes)
+                self.assertTrue(any(k in nomes for k in ("ocorrência", "movimento", "comando")))
+                self.assertIn("nosso número", nomes)
+
+
+class RegistroDeLayouts(unittest.TestCase):
+    def test_ordem_e_chaves_coerentes(self):
+        self.assertEqual(sorted(layouts.LAYOUT_ORDER), sorted(layouts.LAYOUTS))
+        rotulos = layouts.layout_labels()
+        self.assertEqual(len(set(rotulos)), len(rotulos))
+        for chave in layouts.LAYOUT_ORDER:
+            self.assertEqual(layouts.key_for_label(layouts.LAYOUTS[chave].label), chave)
+
+    def test_selecao_automatica_por_banco_e_largura(self):
+        self.assertEqual(layouts.auto_layout_key("748", 400), "sicredi")
+        self.assertEqual(layouts.auto_layout_key("756", 400), "sicoob400")
+        self.assertEqual(layouts.auto_layout_key("756", 240), "sicoob240")
+        self.assertEqual(layouts.auto_layout_key("341", 400), "febraban")
+        self.assertEqual(layouts.auto_layout_key("001", 240), "sicoob240")  # único layout de 240
+        for (banco, largura), chave in layouts.AUTO_LAYOUT_BY_BANK.items():
+            self.assertEqual(layouts.LAYOUTS[chave].width, largura)
+
+    def test_layouts_400_e_240(self):
+        larguras = {chave: layouts.LAYOUTS[chave].width for chave in layouts.LAYOUT_ORDER}
+        self.assertEqual(larguras, {"febraban": 400, "sicredi": 400, "sicoob400": 400, "sicoob240": 240})
+        self.assertIsNotNone(layouts.LAYOUTS["sicoob240"].structure)
+
+    def test_bancos_conhecidos(self):
+        self.assertEqual(febraban.BANK_NAMES["756"], "Sicoob (Bancoob)")
+        self.assertEqual(febraban.BANK_NAMES["748"], "Sicredi")
+
+
+if __name__ == "__main__":
+    unittest.main()

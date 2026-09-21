@@ -1,0 +1,41 @@
+# "Iniciar sprint": cria o milestone da versao, move os epicos de "Proxima sprint" para
+# "Em desenvolvimento" e cria as tarefas ("Tarefas previstas" de cada epico) no painel de Execucao.
+#   gh workflow run iniciar-sprint.yml -f versao=v0.6.0 -f simular=false
+name: Iniciar sprint
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: 'Versao da sprint/release (ex.: v0.6.0)'
+        required: true
+        type: string
+      data:
+        description: 'Data-alvo opcional (AAAA-MM-DD)'
+        required: false
+        type: string
+      simular:
+        description: 'Somente mostrar o que seria feito'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  iniciar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Iniciar sprint
+        run: bash .github/scripts/iniciar-sprint.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          VERSAO: ${{ inputs.versao }}
+          DATA: ${{ inputs.data }}
+          SIMULAR: ${{ inputs.simular }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
