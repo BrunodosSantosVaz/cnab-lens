@@ -88,8 +88,9 @@ class RegistroDeLayouts(unittest.TestCase):
         self.assertEqual(layouts.auto_layout_key("353", 400), "santander400")  # código legado no Header
         self.assertEqual(layouts.auto_layout_key("756", 400), "sicoob400")
         self.assertEqual(layouts.auto_layout_key("756", 240), "sicoob240")
+        self.assertEqual(layouts.auto_layout_key("033", 240), "santander240")
         self.assertEqual(layouts.auto_layout_key("341", 400), "febraban")
-        self.assertEqual(layouts.auto_layout_key("001", 240), "sicoob240")  # único layout de 240
+        self.assertEqual(layouts.auto_layout_key("001", 240), "sicoob240")  # padrão para bancos de 240 sem layout próprio
         for (banco, largura), chave in layouts.AUTO_LAYOUT_BY_BANK.items():
             self.assertEqual(layouts.LAYOUTS[chave].width, largura)
 

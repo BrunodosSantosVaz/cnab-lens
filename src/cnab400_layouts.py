@@ -261,6 +261,7 @@ AUTO_LAYOUT_BY_BANK = {
     ("748", 400): "sicredi",
     ("756", 400): "sicoob400",
     ("756", 240): "sicoob240",
+    ("033", 240): "santander240",
 }
 
 

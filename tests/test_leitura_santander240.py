@@ -47,13 +47,14 @@ def trailer_arquivo(qtd):
 
 
 class ArquivoTemporario(unittest.TestCase):
-    def abrir(self, linhas, layout="santander240"):
+    def abrir(self, linhas, layout=None):
         fd, caminho = tempfile.mkstemp(suffix=".rem")
         with os.fdopen(fd, "w", encoding="latin-1", newline="") as f:
             f.write("\r\n".join(linhas) + "\r\n")
         self.addCleanup(os.remove, caminho)
-        cf = reader.CnabFile(caminho)
-        cf.apply_layout(layout)
+        cf = reader.CnabFile(caminho)  # o layout vem do banco do Header (033)
+        if layout:
+            cf.apply_layout(layout)
         return cf
 
 
@@ -72,7 +73,7 @@ class RemessaSantander240(ArquivoTemporario):
             trailer_lote(7), trailer_arquivo(9),
         ])
 
-    def test_layout_e_tipo(self):
+    def test_layout_e_tipo(self):  # sem escolher o layout: a detecção automática pelo banco 033 basta
         cf = self.arquivo()
         self.assertEqual((cf.tipo_arquivo, cf.banco_codigo, cf.width), ("Remessa", "033", 240))
         self.assertEqual(cf.layout_key, "santander240")
