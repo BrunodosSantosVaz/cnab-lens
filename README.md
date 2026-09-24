@@ -45,7 +45,8 @@ números. Este programa faz a leitura por você:
 ## Recursos
 
 - **CNAB400 e CNAB240**, remessa e retorno, com detecção automática do formato.
-- **Layouts por banco**: FEBRABAN (padrão), Sicredi e Sicoob (400), Sicoob (240). O layout do banco é
+- **Layouts por banco**: FEBRABAN (padrão), Sicredi, Sicoob e Santander (400) e Sicoob e Santander (240),
+  incluindo os registros de QR Code/PIX do Santander. O layout do banco é
   escolhido sozinho pelo código no Header, e dá para trocar na hora sem reabrir o arquivo.
 - **Navegação por pasta**: escolha uma pasta, filtre por extensão e veja o tipo de cada arquivo
   (REM/RET) na lista.
@@ -122,10 +123,12 @@ O seletor **Layout de campos** oferece:
 
 | Layout | Linha | Banco | Escolha automática | Fonte | Testado com arquivo real |
 |--------|:-----:|-------|:------------------:|-------|:------------------------:|
-| CNAB400 FEBRABAN (Padrão) | 400 | genérico (Itaú, BB, Bradesco, Santander, Caixa e outros) | sim, para bancos sem layout próprio | Manual CNAB 400 do Itaú, conferido com o retorno do Banco do Brasil | não |
+| CNAB400 FEBRABAN (Padrão) | 400 | genérico (Itaú, BB, Bradesco, Caixa e outros) | sim, para bancos sem layout próprio | Manual CNAB 400 do Itaú, conferido com o retorno do Banco do Brasil | não |
 | CNAB400 Sicredi | 400 | 748 | sim | Manual CNAB 400 Cobrança, versão 2.4 (out/2022) | sim (retornos) |
 | CNAB400 Sicoob | 400 | 756 | sim | Planilha oficial `Layout_Cobranca_CNAB400.xls` (versão publicada em mai/2025) | não |
-| CNAB240 Sicoob | 240 | 756 | sim (para qualquer CNAB240) | Planilha oficial de layouts CNAB240 do Sicoob (arquivo 081, lote 040/044) | não |
+| CNAB400 Santander | 400 | 033 (e 353, código legado no Header) | sim | Manual oficial "Layout Cobrança H7800 - CNAB 353/400 posições", versão 2.37 (fev/2026) | não |
+| CNAB240 Sicoob | 240 | 756 | sim (e padrão para bancos de 240 sem layout próprio) | Planilha oficial de layouts CNAB240 do Sicoob (arquivo 081, lote 040/044) | não |
+| CNAB240 Santander | 240 | 033 | sim | Manual oficial "Layout Cobrança H7815 - CNAB 240 posições", versão 8.5 (fev/2026) | não |
 
 Notas por layout:
 
@@ -136,9 +139,17 @@ Notas por layout:
 - **Sicoob 400**: o Detalhe tipo 1 é o único registro de título; o Trailer é diferente na remessa e
   no retorno; o retorno não traz o nome do pagador (só o CPF/CNPJ).
 - **Sicoob 240**: Header/Trailer de arquivo e de lote, segmentos P, Q, R, S (remessa) e T, U
-  (retorno), com Nosso Número de 20 posições. É o único layout de 240 posições; para arquivos CNAB240
-  de outros bancos a estrutura de lote/segmento (padrão FEBRABAN) é a mesma, mas campos específicos do
-  banco podem divergir.
+  (retorno), com Nosso Número de 20 posições. É o layout usado para arquivos CNAB240 de bancos sem layout
+  próprio: a estrutura de lote/segmento (padrão FEBRABAN) é a mesma, mas campos específicos do banco
+  podem divergir.
+- **Santander 400**: além do Detalhe (tipo `1`), descreve o registro `8` (tipo de pagamento e dados de
+  QR Code/PIX, opcional) e as mensagens `2` e `4` a `7` na remessa, e o registro `2` (QR Code/PIX) no
+  retorno. Esses registros aparecem agrupados sob o boleto a que pertencem. O Header aceita o banco
+  `033` ou o código legado `353`.
+- **Santander 240**: Header/Trailer de arquivo e de lote, segmentos P, Q, R, S (remessa) e T, U (retorno),
+  com Nosso Número de 13 posições. O segmento **Y** (QR Code/PIX e tipo de pagamento na remessa;
+  QR Code/PIX e cheque no retorno) é identificado pelo sub-código das posições 18-19 (`Y-03`, `Y-53`,
+  `Y-04`), e o segmento S tem dois formatos, escolhidos pela posição 18.
 
 ## Arquivos de exemplo
 
@@ -151,6 +162,8 @@ A pasta [`exemplos/`](exemplos/) traz um par remessa/retorno **100% fictício** 
 | `sicredi_remessa.rem` / `sicredi_retorno.ret` | CNAB400 Sicredi |
 | `sicoob400_remessa.rem` / `sicoob400_retorno.ret` | CNAB400 Sicoob |
 | `sicoob240_remessa.rem` / `sicoob240_retorno.ret` | CNAB240 Sicoob |
+| `santander400_remessa.rem` / `santander400_retorno.ret` | CNAB400 Santander (com QR Code/PIX) |
+| `santander240_remessa.rem` / `santander240_retorno.ret` | CNAB240 Santander (com segmento Y-03) |
 
 Abra o programa, selecione a pasta `exemplos/` e clique nos arquivos. Para regenerá-los:
 `python scripts/gerar_exemplos.py`.
@@ -183,7 +196,9 @@ cnab-lens/
 │   ├── cnab400_layout.py         Layout FEBRABAN genérico, bancos e ocorrências
 │   ├── cnab400_layout_sicredi.py Layout CNAB400 Sicredi
 │   ├── cnab400_layout_sicoob.py  Layout CNAB400 Sicoob
+│   ├── cnab400_layout_santander.py Layout CNAB400 Santander (inclui QR Code/PIX e mensagens)
 │   ├── cnab240_layout_sicoob.py  Layout CNAB240 Sicoob (arquivo, lote, segmentos)
+│   ├── cnab240_layout_santander.py Layout CNAB240 Santander (arquivo, lote, segmentos P a Y)
 │   └── version.py                Versão do programa
 ├── tests/                        Testes automatizados (unittest)
 ├── scripts/
@@ -297,9 +312,14 @@ completo (planejamento, testes, build no CI, aprovação e publicação) está e
 
 ## Limitações conhecidas
 
-- Os layouts **Sicoob** (400 e 240) foram transcritos das planilhas oficiais do Sicoob e testados com
-  arquivos sintéticos, mas **ainda não foram conferidos com arquivos reais do Sicoob**. O layout
-  FEBRABAN também não foi testado com arquivos reais. Só o Sicredi foi validado com arquivos reais.
+- Os layouts **Sicoob** (400 e 240) foram transcritos das planilhas oficiais do Sicoob e os layouts
+  **Santander** (400 e 240), dos manuais oficiais do Santander; todos foram testados com arquivos
+  sintéticos, mas **ainda não foram conferidos com arquivos reais**. O layout FEBRABAN também não foi
+  testado com arquivos reais. Só o Sicredi foi validado com arquivos reais.
+- **Santander**: os manuais têm pequenas inconsistências (por exemplo, o banco aparece como `33` no Header de
+  Arquivo do CNAB240, e alguns campos declaram tamanho diferente das posições). O programa segue as
+  posições; confira com um arquivo real do banco. Os manuais não trazem histórico de revisões e o site do
+  Santander não permite download automático, então uma versão nova precisa ser conferida à mão.
 - **Sicoob 400, retorno**: o CPF/CNPJ do pagador (posições 343–356) tem baixa confiança: a planilha
   oficial escreve 343–357, o que contradiz o tamanho de 14 posições declarado.
 - **Sicoob 240**: a planilha oficial mais recente encontrada é de 2019 (publicada em 2021). As
@@ -307,8 +327,9 @@ completo (planejamento, testes, build no CI, aprovação e publicação) está e
   códigos e remete à tabela FEBRABAN), e o campo "Motivo da Ocorrência" do Segmento T aparece com o
   valor bruto. Os segmentos Y e W não são descritos pelo manual e aparecem como "Conteúdo do Registro
   (não mapeado neste layout)".
-- **CNAB400** cobre só o Detalhe obrigatório (tipo `1`). Registros opcionais (mensagem, rateio,
-  beneficiário final etc.) aparecem como "Desconhecido" quando presentes.
+- **CNAB400** cobre só o Detalhe obrigatório (tipo `1`), exceto no layout **Santander**, que também
+  descreve os registros opcionais `8` e `2`, `4` a `7`. Nos demais layouts, registros opcionais (mensagem,
+  rateio, beneficiário final etc.) não são interpretados.
 - **Sicredi**: a "Tabela de Motivos" do retorno não é decodificada (valor bruto).
 - Campos de uso exclusivo do banco podem variar entre instituições: o valor bruto continua correto, mas
   o nome do campo pode não corresponder ao do seu banco. Nesse caso, compare com o manual do banco e
@@ -387,6 +408,8 @@ resumos em português dos manuais):
 | CNAB400 Sicredi | [Manual CNAB 400 Cobrança, versão 2.4 (out/2022)](https://www.sicredi.com.br/media/produtos/filer_public/2022/09/26/manual_cnab_400_2-4_260922.pdf) |
 | CNAB400 Sicoob | [Planilha oficial `Layout_Cobranca_CNAB400.xls`](https://www.sicoob.com.br/documents/20128/263767178/Layout_Cobranca_CNAB400.xls/675009c2-3ed6-3156-ea46-54cf78088652?version=1.0&t=1747656841831&download=true) (abas Remessa e Retorno) |
 | CNAB240 Sicoob | [Planilha oficial de layouts CNAB240](https://www.sicoob.com.br/documents/3068856/0/layout-cnab-240.xls/5bfadf52-4278-3d28-0b69-b09b467aad45) (abas Remessa e Retorno; layout de arquivo 081, lote 040/044) |
+| CNAB400 Santander | Manual "Layout Cobrança H7800 - CNAB 353/400 posições", versão 2.37 (fev/2026), na [página de layouts do Santander](https://www.santander.com.br/layout-de-arquivos) |
+| CNAB240 Santander | Manual "Layout Cobrança H7815 - CNAB 240 posições", padrão Santander/Multibanco, versão 8.5 (fev/2026), na [página de layouts do Santander](https://www.santander.com.br/layout-de-arquivos) |
 
 Conferências cruzadas (sem cópia de código): projetos open source
 [brcobranca](https://github.com/kivanio/brcobranca), [laravel-boleto](https://github.com/eduardokum/laravel-boleto)
