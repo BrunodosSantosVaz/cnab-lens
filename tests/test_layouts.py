@@ -81,6 +81,8 @@ class RegistroDeLayouts(unittest.TestCase):
 
     def test_selecao_automatica_por_banco_e_largura(self):
         self.assertEqual(layouts.auto_layout_key("748", 400), "sicredi")
+        self.assertEqual(layouts.auto_layout_key("033", 400), "santander400")
+        self.assertEqual(layouts.auto_layout_key("353", 400), "santander400")  # código legado no Header
         self.assertEqual(layouts.auto_layout_key("756", 400), "sicoob400")
         self.assertEqual(layouts.auto_layout_key("756", 240), "sicoob240")
         self.assertEqual(layouts.auto_layout_key("341", 400), "febraban")
@@ -90,12 +92,25 @@ class RegistroDeLayouts(unittest.TestCase):
 
     def test_layouts_400_e_240(self):
         larguras = {chave: layouts.LAYOUTS[chave].width for chave in layouts.LAYOUT_ORDER}
-        self.assertEqual(larguras, {"febraban": 400, "sicredi": 400, "sicoob400": 400, "sicoob240": 240})
+        self.assertEqual(larguras, {"febraban": 400, "sicredi": 400, "sicoob400": 400, "santander400": 400, "sicoob240": 240})
         self.assertIsNotNone(layouts.LAYOUTS["sicoob240"].structure)
+
+    def test_registros_opcionais_do_santander_400(self):
+        registros = layouts.LAYOUTS["santander400"].record_types
+        self.assertEqual(sorted(registros), ["2", "4", "5", "6", "7", "8"])
+        self.assertIn("QR Code", registros["8"]("Remessa")[0])
+        self.assertIsNone(registros["8"]("Retorno"))  # o registro 8 não existe no retorno
+        self.assertIn("Mensagem", registros["2"]("Remessa")[0])
+        self.assertIn("QR Code", registros["2"]("Retorno")[0])  # o mesmo tipo 2 muda de significado no retorno
+        self.assertIsNone(registros["4"]("Retorno"))
+        self.assertTrue(registros["7"]("Remessa")[0].startswith("Registro 7"))
+        for chave in ("febraban", "sicredi", "sicoob400", "sicoob240"):
+            self.assertIsNone(layouts.LAYOUTS[chave].record_types, chave)
 
     def test_bancos_conhecidos(self):
         self.assertEqual(febraban.BANK_NAMES["756"], "Sicoob (Bancoob)")
         self.assertEqual(febraban.BANK_NAMES["748"], "Sicredi")
+        self.assertEqual(febraban.BANK_NAMES["033"], "Santander")
 
 
 if __name__ == "__main__":
