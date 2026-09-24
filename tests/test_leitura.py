@@ -17,6 +17,10 @@ ESPERADO = {
     "sicoob400_retorno.ret": ("sicoob400", "Retorno", 400, "756"),
     "sicoob240_remessa.rem": ("sicoob240", "Remessa", 240, "756"),
     "sicoob240_retorno.ret": ("sicoob240", "Retorno", 240, "756"),
+    "santander400_remessa.rem": ("santander400", "Remessa", 400, "033"),
+    "santander400_retorno.ret": ("santander400", "Retorno", 400, "033"),
+    "santander240_remessa.rem": ("santander240", "Remessa", 240, "033"),
+    "santander240_retorno.ret": ("santander240", "Retorno", 240, "033"),
 }
 
 

@@ -130,6 +130,7 @@ class CnabRecord:
             else:
                 self.tipo = "desconhecido"
                 self.tipo_label = f"Desconhecido (código '{self.tipo_char}')"
+        self.rotulo_padrao = self.tipo_label
         self.fields = []
         self.field_map = {}
 
@@ -345,7 +346,13 @@ class CnabFile:
             elif rec.tipo == "header_lote":
                 campos = estrutura.header_lote(tipo)
             elif rec.tipo == "detalhe":
-                campos = estrutura.segmento(tipo, rec.segmento)
+                # o segmento pode se subdividir (Santander: Y-03, Y-53, Y-04 e S-1, S-2); sem a função
+                # `chave_segmento` do layout, a chave é a letra da posição 14
+                chave = rec.segmento
+                if estrutura.chave_segmento:
+                    chave = estrutura.chave_segmento(tipo, rec.segmento, rec.raw)
+                rec.tipo_label = f"Detalhe (Registro 3) - Segmento {chave or '?'}"
+                campos = estrutura.segmento(tipo, chave)
             elif rec.tipo == "trailer_lote":
                 campos = estrutura.trailer_lote(tipo)
             elif rec.tipo == "trailer_arquivo":
@@ -378,9 +385,39 @@ class CnabFile:
             self.header.set_fields(active.header_fields(self.tipo_arquivo))
         if self.trailer is not None:
             self.trailer.set_fields(active.trailer_fields(self.tipo_arquivo))
+        registros = active.record_types or {}
         for rec in self.records:
-            if rec.tipo == "detalhe" or rec.tipo == "desconhecido":
+            rec.tipo_label = rec.rotulo_padrao  # desfaz o rótulo de um layout anterior
+            if rec.tipo == "detalhe":
                 rec.set_fields(detail_fields)
+            elif rec.tipo == "desconhecido":
+                # registro além de 0/1/9: se o layout o descreve (ex.: dados de QR Code), usa os campos dele
+                info = registros.get(rec.tipo_char, lambda _tipo: None)(self.tipo_arquivo)
+                if info:
+                    rec.tipo_label, campos = info
+                    rec.set_fields(campos)
+                else:
+                    rec.set_fields(detail_fields)
+        if registros:
+            self.detalhes = self._agrupar_detalhes_400(registros)
+        else:
+            self.detalhes = [r for r in self.records if r.tipo == "detalhe"]
+
+    def _agrupar_detalhes_400(self, registros):
+        """Nos layouts com registros opcionais (ex.: Santander), cada Detalhe (tipo 1) abre um
+        lançamento e os registros seguintes que o layout descreve (QR Code, mensagens) entram nele,
+        como os segmentos do CNAB240. Registros que o layout não descreve ficam de fora, como antes."""
+        grupos, atual = [], None
+        for rec in self.records:
+            if rec.tipo == "detalhe":
+                atual = [rec]
+                grupos.append(atual)
+            elif rec.tipo == "desconhecido" and atual is not None and rec.tipo_char in registros:
+                if registros[rec.tipo_char](self.tipo_arquivo):  # descrito para este tipo de arquivo
+                    atual.append(rec)
+            else:
+                atual = None
+        return [CnabGroup(g) for g in grupos]
 
 
 # Zebra striping: linhas alternadas branca/cinza-claro para facilitar a

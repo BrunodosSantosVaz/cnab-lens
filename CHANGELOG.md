@@ -6,6 +6,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Não lançado]
 
+## [0.2.0] - 2026-09-24
+
+### Adicionado
+- Santander CNAB400: módulo de layout (Header, Movimento tipo 1 e Trailer, remessa e retorno) com tabelas de código (#5)
+- Santander CNAB400: reconhecer no leitor os registros tipo 8 (QR Code/PIX), 2/4/5/6/7 (mensagens) e o tipo 2 do retorno, com layout por tipo de registro (#6)
+- Santander CNAB240: módulo de layout (Headers, Segmentos P, Q, R, S na remessa e T, U no retorno, Trailers) com tabelas de movimento e ocorrência (#7)
+- Santander CNAB240: Segmentos Y-03 e Y-53 (remessa) e Y-03 e Y-04 (retorno) com sub-código do segmento Y (#8)
+- Registrar os layouts Santander no seletor e na detecção automática pelo banco (033 e 353) (#9)
+- Arquivos de exemplo fictícios e testes de leitura para remessa e retorno, 400 e 240, incluindo QR Code e segmento Y (#10)
+
 ## [0.1.0] - 2026-09-21
 
 Primeira versão pública do **CNABLens**.
