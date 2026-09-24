@@ -5,11 +5,12 @@ import unittest
 import _caminho  # noqa: F401
 import cnab240_layout_sicoob as sicoob240
 import cnab400_layout as febraban
+import cnab400_layout_santander as santander400
 import cnab400_layout_sicoob as sicoob400
 import cnab400_layout_sicredi as sicredi
 import cnab400_layouts as layouts
 
-MODULOS = [(febraban, 400), (sicredi, 400), (sicoob400, 400), (sicoob240, 240)]
+MODULOS = [(febraban, 400), (sicredi, 400), (sicoob400, 400), (santander400, 400), (sicoob240, 240)]
 
 
 def listas_de_campos(modulo):
@@ -55,6 +56,8 @@ class ResumoDaGrade(unittest.TestCase):
         yield "sicredi/Retorno", sicredi.DETAIL_RETORNO_FIELDS
         yield "sicoob400/Remessa", sicoob400.DETAIL_REMESSA_FIELDS
         yield "sicoob400/Retorno", sicoob400.DETAIL_RETORNO_FIELDS
+        yield "santander400/Remessa", santander400.DETAIL_REMESSA_FIELDS
+        yield "santander400/Retorno", santander400.DETAIL_RETORNO_FIELDS
         yield "sicoob240/Remessa", sicoob240.SEGMENTO_P_REMESSA_FIELDS
         yield "sicoob240/Retorno", sicoob240.SEGMENTO_T_RETORNO_FIELDS
 
