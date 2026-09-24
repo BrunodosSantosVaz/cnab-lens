@@ -25,22 +25,31 @@ LAYOUTS abaixo.
 from collections import namedtuple
 
 import cnab400_layout as febraban
+import cnab400_layout_santander as santander400
 import cnab400_layout_sicredi as sicredi
 import cnab400_layout_sicoob as sicoob400
+import cnab240_layout_santander as santander240
 import cnab240_layout_sicoob as sicoob240
 
 CnabLayout = namedtuple(
     "CnabLayout",
     ["key", "label", "header_fields", "detail_fields", "trailer_fields", "ocorrencia_codes",
-     "width", "comando_codes", "structure"],
-    defaults=(400, None, None),
+     "width", "comando_codes", "structure", "record_types"],
+    defaults=(400, None, None, None),
 )
+# `record_types` (só CNAB400, opcional): registros além de Header (0), Detalhe (1) e Trailer (9) que o
+# layout descreve, como {caractere da posição 1: função(tipo_arquivo) -> (rótulo, lista de campos) ou None}.
+# Esses registros (ex.: dados de QR Code, mensagens) ficam agrupados sob o Detalhe (tipo 1) que os precede.
 
 # Só CNAB240: como achar a lista de campos de cada tipo de registro.
 Cnab240Structure = namedtuple(
     "Cnab240Structure",
-    ["header_arquivo", "header_lote", "segmento", "trailer_lote", "trailer_arquivo"],
+    ["header_arquivo", "header_lote", "segmento", "trailer_lote", "trailer_arquivo", "chave_segmento"],
+    defaults=(None,),
 )
+# `chave_segmento` (opcional): (tipo_arquivo, letra do segmento, linha) -> chave usada em `segmento`.
+# Sem ele a chave é a própria letra. O Santander usa para os segmentos que se subdividem: o Y pelo
+# sub-código das posições 18-19 (Y-03, Y-53, Y-04) e o S pelo formato da posição 18 (S-1, S-2).
 
 
 def unmapped_fields(width):
@@ -92,6 +101,52 @@ def _sicoob400_trailer(tipo_arquivo):
     return sicoob400.TRAILER_RETORNO_FIELDS if tipo_arquivo == "Retorno" else sicoob400.TRAILER_REMESSA_FIELDS
 
 
+def _santander400_header(tipo_arquivo):
+    return santander400.HEADER_RETORNO_FIELDS if tipo_arquivo == "Retorno" else santander400.HEADER_REMESSA_FIELDS
+
+
+def _santander400_detail(tipo_arquivo):
+    return santander400.DETAIL_RETORNO_FIELDS if tipo_arquivo == "Retorno" else santander400.DETAIL_REMESSA_FIELDS
+
+
+def _santander400_trailer(tipo_arquivo):
+    return santander400.TRAILER_RETORNO_FIELDS if tipo_arquivo == "Retorno" else santander400.TRAILER_REMESSA_FIELDS
+
+
+def _santander400_registro_2(tipo_arquivo):
+    # O registro 2 é a mensagem do Recibo do Pagador na remessa e os dados de QR Code/PIX no retorno.
+    if tipo_arquivo == "Retorno":
+        return "Registro 2 - Dados de QR Code/PIX", santander400.QRCODE_RETORNO_FIELDS
+    return "Registro 2 - Mensagem no Recibo do Pagador", santander400.MENSAGEM_REMESSA_FIELDS
+
+
+def _santander400_registro_8(tipo_arquivo):
+    if tipo_arquivo == "Retorno":
+        return None
+    return "Registro 8 - Tipo de pagamento e dados de QR Code/PIX", santander400.QRCODE_REMESSA_FIELDS
+
+
+def _santander400_mensagem_ficha(tipo_arquivo):
+    if tipo_arquivo == "Retorno":
+        return None
+    return "Mensagem na Ficha de Compensação", santander400.MENSAGEM_REMESSA_FIELDS
+
+
+_SANTANDER400_REGISTROS = {
+    "2": _santander400_registro_2,
+    "4": lambda tipo: _rotulado(_santander400_mensagem_ficha(tipo), "Registro 4"),
+    "5": lambda tipo: _rotulado(_santander400_mensagem_ficha(tipo), "Registro 5"),
+    "6": lambda tipo: _rotulado(_santander400_mensagem_ficha(tipo), "Registro 6"),
+    "7": lambda tipo: _rotulado(_santander400_mensagem_ficha(tipo), "Registro 7"),
+    "8": _santander400_registro_8,
+}
+
+
+def _rotulado(registro, prefixo):
+    """Acrescenta o número do registro ao rótulo (ou devolve None se o registro não existe nesse tipo)."""
+    return None if registro is None else (f"{prefixo} - {registro[0]}", registro[1])
+
+
 # --- CNAB240 -----------------------------------------------------------------
 
 def _por_tipo(remessa, retorno):
@@ -105,6 +160,24 @@ _SICOOB240_STRUCTURE = Cnab240Structure(
     segmento=lambda tipo_arquivo, letra: sicoob240.SEGMENTOS.get((tipo_arquivo, letra)),
     trailer_lote=_por_tipo(sicoob240.TRAILER_LOTE_REMESSA_FIELDS, sicoob240.TRAILER_LOTE_RETORNO_FIELDS),
     trailer_arquivo=_por_tipo(sicoob240.TRAILER_ARQUIVO_FIELDS, sicoob240.TRAILER_ARQUIVO_FIELDS),
+)
+
+
+def _santander240_chave_segmento(tipo_arquivo, letra, linha):
+    if letra == "Y":
+        return "Y-" + (linha + "  ")[17:19]
+    if letra == "S":
+        return "S-" + (linha + " ")[17:18]
+    return letra
+
+
+_SANTANDER240_STRUCTURE = Cnab240Structure(
+    header_arquivo=_por_tipo(santander240.HEADER_ARQUIVO_REMESSA_FIELDS, santander240.HEADER_ARQUIVO_RETORNO_FIELDS),
+    header_lote=_por_tipo(santander240.HEADER_LOTE_REMESSA_FIELDS, santander240.HEADER_LOTE_RETORNO_FIELDS),
+    segmento=lambda tipo_arquivo, chave: santander240.SEGMENTOS.get((tipo_arquivo, chave)),
+    trailer_lote=_por_tipo(santander240.TRAILER_LOTE_REMESSA_FIELDS, santander240.TRAILER_LOTE_RETORNO_FIELDS),
+    trailer_arquivo=_por_tipo(santander240.TRAILER_ARQUIVO_REMESSA_FIELDS, santander240.TRAILER_ARQUIVO_RETORNO_FIELDS),
+    chave_segmento=_santander240_chave_segmento,
 )
 
 
@@ -134,6 +207,27 @@ LAYOUTS = {
         ocorrencia_codes=sicoob400.OCORRENCIA_CODES,
         comando_codes=sicoob400.COMANDO_REMESSA_CODES,
     ),
+    "santander400": CnabLayout(
+        key="santander400",
+        label="CNAB400 Santander",
+        header_fields=_santander400_header,
+        detail_fields=_santander400_detail,
+        trailer_fields=_santander400_trailer,
+        ocorrencia_codes=santander400.OCORRENCIA_CODES,
+        comando_codes=santander400.COMANDO_REMESSA_CODES,
+        record_types=_SANTANDER400_REGISTROS,
+    ),
+    "santander240": CnabLayout(
+        key="santander240",
+        label="CNAB240 Santander",
+        header_fields=None,
+        detail_fields=None,
+        trailer_fields=None,
+        ocorrencia_codes=santander240.MOVIMENTO_RETORNO_CODES,
+        width=240,
+        comando_codes=santander240.MOVIMENTO_REMESSA_CODES,
+        structure=_SANTANDER240_STRUCTURE,
+    ),
     "sicoob240": CnabLayout(
         key="sicoob240",
         label="CNAB240 Sicoob",
@@ -148,7 +242,7 @@ LAYOUTS = {
 }
 
 # Ordem de exibição no seletor da interface.
-LAYOUT_ORDER = ["febraban", "sicredi", "sicoob400", "sicoob240"]
+LAYOUT_ORDER = ["febraban", "sicredi", "sicoob400", "santander400", "sicoob240", "santander240"]
 
 DEFAULT_LAYOUT_KEY = "febraban"
 
@@ -162,9 +256,12 @@ DEFAULT_LAYOUT_BY_WIDTH = {400: "febraban", 240: "sicoob240"}
 # automaticamente um layout diferente do padrão (o usuário pode trocar
 # manualmente a qualquer momento). Chave: (código do banco, largura da linha).
 AUTO_LAYOUT_BY_BANK = {
+    ("033", 400): "santander400",
+    ("353", 400): "santander400",  # código legado do Santander, aceito no Header do CNAB 400
     ("748", 400): "sicredi",
     ("756", 400): "sicoob400",
     ("756", 240): "sicoob240",
+    ("033", 240): "santander240",
 }
 
 
