@@ -28,6 +28,7 @@ import cnab400_layout as febraban
 import cnab400_layout_santander as santander400
 import cnab400_layout_sicredi as sicredi
 import cnab400_layout_sicoob as sicoob400
+import cnab240_layout_santander as santander240
 import cnab240_layout_sicoob as sicoob240
 
 CnabLayout = namedtuple(
@@ -43,8 +44,12 @@ CnabLayout = namedtuple(
 # Só CNAB240: como achar a lista de campos de cada tipo de registro.
 Cnab240Structure = namedtuple(
     "Cnab240Structure",
-    ["header_arquivo", "header_lote", "segmento", "trailer_lote", "trailer_arquivo"],
+    ["header_arquivo", "header_lote", "segmento", "trailer_lote", "trailer_arquivo", "chave_segmento"],
+    defaults=(None,),
 )
+# `chave_segmento` (opcional): (tipo_arquivo, letra do segmento, linha) -> chave usada em `segmento`.
+# Sem ele a chave é a própria letra. O Santander usa para os segmentos que se subdividem: o Y pelo
+# sub-código das posições 18-19 (Y-03, Y-53, Y-04) e o S pelo formato da posição 18 (S-1, S-2).
 
 
 def unmapped_fields(width):
@@ -158,6 +163,24 @@ _SICOOB240_STRUCTURE = Cnab240Structure(
 )
 
 
+def _santander240_chave_segmento(tipo_arquivo, letra, linha):
+    if letra == "Y":
+        return "Y-" + (linha + "  ")[17:19]
+    if letra == "S":
+        return "S-" + (linha + " ")[17:18]
+    return letra
+
+
+_SANTANDER240_STRUCTURE = Cnab240Structure(
+    header_arquivo=_por_tipo(santander240.HEADER_ARQUIVO_REMESSA_FIELDS, santander240.HEADER_ARQUIVO_RETORNO_FIELDS),
+    header_lote=_por_tipo(santander240.HEADER_LOTE_REMESSA_FIELDS, santander240.HEADER_LOTE_RETORNO_FIELDS),
+    segmento=lambda tipo_arquivo, chave: santander240.SEGMENTOS.get((tipo_arquivo, chave)),
+    trailer_lote=_por_tipo(santander240.TRAILER_LOTE_REMESSA_FIELDS, santander240.TRAILER_LOTE_RETORNO_FIELDS),
+    trailer_arquivo=_por_tipo(santander240.TRAILER_ARQUIVO_REMESSA_FIELDS, santander240.TRAILER_ARQUIVO_RETORNO_FIELDS),
+    chave_segmento=_santander240_chave_segmento,
+)
+
+
 LAYOUTS = {
     "febraban": CnabLayout(
         key="febraban",
@@ -194,6 +217,17 @@ LAYOUTS = {
         comando_codes=santander400.COMANDO_REMESSA_CODES,
         record_types=_SANTANDER400_REGISTROS,
     ),
+    "santander240": CnabLayout(
+        key="santander240",
+        label="CNAB240 Santander",
+        header_fields=None,
+        detail_fields=None,
+        trailer_fields=None,
+        ocorrencia_codes=santander240.MOVIMENTO_RETORNO_CODES,
+        width=240,
+        comando_codes=santander240.MOVIMENTO_REMESSA_CODES,
+        structure=_SANTANDER240_STRUCTURE,
+    ),
     "sicoob240": CnabLayout(
         key="sicoob240",
         label="CNAB240 Sicoob",
@@ -208,7 +242,7 @@ LAYOUTS = {
 }
 
 # Ordem de exibição no seletor da interface.
-LAYOUT_ORDER = ["febraban", "sicredi", "sicoob400", "santander400", "sicoob240"]
+LAYOUT_ORDER = ["febraban", "sicredi", "sicoob400", "santander400", "sicoob240", "santander240"]
 
 DEFAULT_LAYOUT_KEY = "febraban"
 

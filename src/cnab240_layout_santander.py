@@ -7,14 +7,16 @@ Fonte: "Layout Cobrança H7815 - CNAB 240 posições - padrão Santander/Multiba
 descrições são as notas desse manual.
 
 Estrutura (posição 8 = tipo de registro; posição 14 = segmento do Registro Detalhe):
-  Remessa: Header de Arquivo (0), Header de Lote (1), Segmentos P e Q (obrigatórios), R, S (opcionais),
+  Remessa: Header de Arquivo (0), Header de Lote (1), Segmentos P e Q (obrigatórios), R, S (opcionais), Y-03 e Y-53 (opcionais),
            Trailer de Lote (5), Trailer de Arquivo (9).
-  Retorno: Header de Arquivo, Header de Lote, Segmentos T e U (obrigatórios),
+  Retorno: Header de Arquivo, Header de Lote, Segmentos T e U (obrigatórios), Y-03 e Y-04 (opcionais),
            Trailer de Lote, Trailer de Arquivo.
 
 O Segmento S tem dois formatos, escolhidos pela posição 18 ("Identificação da impressão"): 1 = formulário
 especial (mensagem por linha) e 2 = mensagens 5 a 9. Aqui são as listas SEGMENTO_S_1_REMESSA_FIELDS e
 SEGMENTO_S_2_REMESSA_FIELDS.
+O Segmento Y traz o sub-código nas posições 18-19 ("Identificação do Registro": 03 = QR Code/PIX,
+53 = tipo de pagamento, 04 = cheque no retorno).
 
 Convenções de nome (a interface depende delas): o resumo da grade procura por trechos como "Data de
 Vencimento", "Valor Nominal", "Nosso Número", "Número do Documento", "Código de Movimento", "Nome do
@@ -357,6 +359,70 @@ SEGMENTO_S_2_REMESSA_FIELDS = [
      "Reservado para uso do Banco (22 posições); conteúdo no manual: Brancos."),
 ]
 
+# SEGMENTO_Y03_REMESSA_FIELDS
+SEGMENTO_Y03_REMESSA_FIELDS = [
+    ("Código do Banco na compensação", 1, 3,
+     "Numérico, 3 posições; conteúdo no manual: 033."),
+    ("Lote de serviço", 4, 7,
+     "Numérico, 4 posições; ver nota 1 do manual."),
+    ("Tipo de registro", 8, 8,
+     "Numérico, 1 posição; conteúdo no manual: 3; ver nota 2 do manual."),
+    ("Nº sequencial do registro no lote", 9, 13,
+     "Numérico, 5 posições; ver nota 11 do manual."),
+    ("Cód. Segmento do registro detalhe", 14, 14,
+     "Alfanumérico, 1 posição; conteúdo no manual: Y; ver nota 13 do manual."),
+    ("Uso Reservado (Filler)", 15, 15,
+     "Reservado para uso do Banco (1 posição); conteúdo no manual: Brancos."),
+    ("Código de movimento Remessa", 16, 17,
+     "Numérico, 2 posições; ver nota 14 do manual."),
+    ("Identificação Registro", 18, 19,
+     "Numérico, 2 posições; conteúdo no manual: 03; ver nota 42 do manual."),
+    ("Uso Reservado (Filler)", 20, 80,
+     "Reservado para uso do Banco (61 posições); conteúdo no manual: Brancos."),
+    ("Tipo de Chave Pix", 81, 81,
+     "Alfanumérico, 1 posição; ver nota 49 do manual."),
+    ("Chave Pix", 82, 158,
+     "Alfanumérico, 77 posições; ver nota 50 do manual."),
+    ("Código identificação do QR Code", 159, 193,
+     "Alfanumérico, 35 posições; ver nota 52 do manual."),
+    ("Uso Reservado (Filler)", 194, 240,
+     "Reservado para uso do Banco (47 posições); conteúdo no manual: Brancos."),
+]
+
+# SEGMENTO_Y53_REMESSA_FIELDS
+SEGMENTO_Y53_REMESSA_FIELDS = [
+    ("Código do Banco na compensação", 1, 3,
+     "Numérico, 3 posições; conteúdo no manual: 033."),
+    ("Lote de serviço", 4, 7,
+     "Numérico, 4 posições; ver nota 1 do manual."),
+    ("Tipo de registro", 8, 8,
+     "Numérico, 1 posição; conteúdo no manual: 3; ver nota 2 do manual."),
+    ("Nº sequencial do registro no lote", 9, 13,
+     "Numérico, 5 posições; ver nota 11 do manual."),
+    ("Cód. Segmento do registro detalhe", 14, 14,
+     "Alfanumérico, 1 posição; conteúdo no manual: Y; ver nota 13 do manual."),
+    ("Uso Reservado (Filler)", 15, 15,
+     "Reservado para uso do Banco (1 posição); conteúdo no manual: Brancos."),
+    ("Código de movimento Remessa", 16, 17,
+     "Numérico, 2 posições; ver nota 14 do manual."),
+    ("Identificação Registro", 18, 19,
+     "Numérico, 2 posições; conteúdo no manual: 53; ver nota 42 do manual."),
+    ("Identificação de tipo de Pagamento", 20, 21,
+     "Numérico, 2 posições; ver nota 46 do manual."),
+    ("Quantidade de Pagamentos", 22, 23,
+     "Numérico, 2 posições; ver nota 47 do manual."),
+    ("Tipo de valor Informado", 24, 24,
+     "Numérico, 1 posição; ver nota 48 do manual."),
+    ("Valor Máximo ou Percentual Máximo", 25, 39,
+     "Valor máximo (13 inteiros + 2 decimais) ou percentual máximo (10 inteiros + 5 decimais) aceito no pagamento, conforme o tipo de valor informado (nota 48), sem separador decimal."),
+    ("Tipo de valor Informado", 40, 40,
+     "Numérico, 1 posição; ver nota 48 do manual."),
+    ("Valor Mínimo ou Percentual Mínimo", 41, 55,
+     "Valor mínimo (13 inteiros + 2 decimais) ou percentual mínimo (10 inteiros + 5 decimais) aceito no pagamento, conforme o tipo de valor informado (nota 48), sem separador decimal."),
+    ("Uso Reservado (Filler)", 56, 240,
+     "Reservado para uso do Banco (185 posições); conteúdo no manual: Brancos."),
+]
+
 # TRAILER_LOTE_REMESSA_FIELDS
 TRAILER_LOTE_REMESSA_FIELDS = [
     ("Código do Banco na compensação", 1, 3,
@@ -601,6 +667,70 @@ SEGMENTO_U_RETORNO_FIELDS = [
      "Reservado para uso do Banco (27 posições); conteúdo no manual: Brancos."),
 ]
 
+# SEGMENTO_Y03_RETORNO_FIELDS
+SEGMENTO_Y03_RETORNO_FIELDS = [
+    ("Código do Banco na compensação", 1, 3,
+     "Numérico, 3 posições; conteúdo no manual: 033."),
+    ("Lote de serviço", 4, 7,
+     "Numérico, 4 posições; ver nota 1 do manual."),
+    ("Tipo de registro", 8, 8,
+     "Numérico, 1 posição; conteúdo no manual: 3; ver nota 2 do manual."),
+    ("Nº sequencial do registro no lote", 9, 13,
+     "Numérico, 5 posições; ver nota 11 do manual."),
+    ("Cód. Segmento do registro detalhe", 14, 14,
+     "Alfanumérico, 1 posição; conteúdo no manual: Y; ver nota 13 do manual."),
+    ("Uso Reservado (Filler)", 15, 15,
+     "Reservado para uso do Banco (1 posição); conteúdo no manual: Brancos."),
+    ("Código de Movimento (Ocorrência)", 16, 17,
+     "Numérico, 2 posições; ver nota 14 do manual."),
+    ("Identificação Registro", 18, 19,
+     "Numérico, 2 posições; conteúdo no manual: 03; ver nota 42 do manual."),
+    ("Uso Reservado (Filler)", 20, 80,
+     "Reservado para uso do Banco (61 posições); conteúdo no manual: Brancos."),
+    ("Tipo de Chave Pix / Brancos", 81, 81,
+     "Alfanumérico, 1 posição; ver nota 49 do manual."),
+    ("Chave Pix / URL do QR Code", 82, 158,
+     "Alfanumérico, 77 posições; ver nota 50 do manual."),
+    ("Código identificação do QR Code", 159, 193,
+     "Alfanumérico, 35 posições; ver nota 52 do manual."),
+    ("Uso Reservado (Filler)", 194, 240,
+     "Reservado para uso do Banco (47 posições); conteúdo no manual: Brancos."),
+]
+
+# SEGMENTO_Y04_RETORNO_FIELDS
+SEGMENTO_Y04_RETORNO_FIELDS = [
+    ("Código do Banco na compensação", 1, 3,
+     "Numérico, 3 posições; conteúdo no manual: 033."),
+    ("Lote de serviço", 4, 7,
+     "Numérico, 4 posições; ver nota 1 do manual."),
+    ("Tipo de registro", 8, 8,
+     "Numérico, 1 posição; conteúdo no manual: 3; ver nota 2 do manual."),
+    ("Nº seqüencial do registro no lote", 9, 13,
+     "Numérico, 5 posições; ver nota 11 do manual."),
+    ("Cód. segmento do registro detalhe", 14, 14,
+     "Alfanumérico, 1 posição; conteúdo no manual: Y; ver nota 13 do manual."),
+    ("Uso Reservado (Filler)", 15, 15,
+     "Reservado para uso do Banco (1 posição); conteúdo no manual: Brancos."),
+    ("Código de Movimento (Ocorrência)", 16, 17,
+     "Numérico, 2 posições; conteúdo no manual: 06; ver nota 40 do manual."),
+    ("Identificação Registro Opcional", 18, 19,
+     "Numérico, 2 posições; conteúdo no manual: 04; ver nota 42 do manual."),
+    ("Identificação do Cheque 1", 20, 53,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Identificação do Cheque 2", 54, 87,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Identificação do Cheque 3", 88, 121,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Identificação do Cheque 4", 122, 155,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Identificação do Cheque 5", 156, 189,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Identificação do Cheque 6", 190, 223,
+     "Alfanumérico, 34 posições; ver nota 43 do manual."),
+    ("Uso Reservado (Filler)", 224, 240,
+     "Reservado para uso do Banco (17 posições); conteúdo no manual: Brancos."),
+]
+
 # TRAILER_LOTE_RETORNO_FIELDS
 TRAILER_LOTE_RETORNO_FIELDS = [
     ("Código do Banco na compensação", 1, 3,
@@ -663,6 +793,10 @@ SEGMENTOS = {
     ("Remessa", "S-2"): SEGMENTO_S_2_REMESSA_FIELDS,
     ("Retorno", "T"): SEGMENTO_T_RETORNO_FIELDS,
     ("Retorno", "U"): SEGMENTO_U_RETORNO_FIELDS,
+    ("Remessa", "Y-03"): SEGMENTO_Y03_REMESSA_FIELDS,
+    ("Remessa", "Y-53"): SEGMENTO_Y53_REMESSA_FIELDS,
+    ("Retorno", "Y-03"): SEGMENTO_Y03_RETORNO_FIELDS,
+    ("Retorno", "Y-04"): SEGMENTO_Y04_RETORNO_FIELDS,
 }
 
 REGISTROS = {

@@ -346,7 +346,13 @@ class CnabFile:
             elif rec.tipo == "header_lote":
                 campos = estrutura.header_lote(tipo)
             elif rec.tipo == "detalhe":
-                campos = estrutura.segmento(tipo, rec.segmento)
+                # o segmento pode se subdividir (Santander: Y-03, Y-53, Y-04 e S-1, S-2); sem a função
+                # `chave_segmento` do layout, a chave é a letra da posição 14
+                chave = rec.segmento
+                if estrutura.chave_segmento:
+                    chave = estrutura.chave_segmento(tipo, rec.segmento, rec.raw)
+                rec.tipo_label = f"Detalhe (Registro 3) - Segmento {chave or '?'}"
+                campos = estrutura.segmento(tipo, chave)
             elif rec.tipo == "trailer_lote":
                 campos = estrutura.trailer_lote(tipo)
             elif rec.tipo == "trailer_arquivo":

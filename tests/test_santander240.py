@@ -123,9 +123,34 @@ class Segmentos(Base):
         self.confere(t, 99, 115, "descontada")
         self.confere(t, 116, 123, "aviso de lançamento")
 
+    def test_segmento_y(self):
+        y03 = s.SEGMENTO_Y03_REMESSA_FIELDS
+        self.confere(y03, 14, 14, "segmento")
+        self.confere(y03, 18, 19, "identificação registro")
+        self.confere(y03, 81, 81, "tipo de chave pix")
+        self.confere(y03, 82, 158, "chave pix")
+        self.confere(y03, 159, 193, "qr code")
+        y53 = s.SEGMENTO_Y53_REMESSA_FIELDS
+        self.confere(y53, 18, 19, "identificação registro")
+        self.confere(y53, 20, 21, "tipo de pagamento")
+        self.confere(y53, 22, 23, "quantidade de pagamentos")
+        self.confere(y53, 25, 39, "máximo")
+        self.confere(y53, 41, 55, "mínimo")
+        r03 = s.SEGMENTO_Y03_RETORNO_FIELDS
+        self.confere(r03, 82, 158, "url do qr code")
+        self.confere(r03, 159, 193, "qr code")
+        y04 = s.SEGMENTO_Y04_RETORNO_FIELDS
+        self.confere(y04, 18, 19, "identificação registro")
+        self.confere(y04, 20, 53, "cheque 1")
+        self.confere(y04, 190, 223, "cheque 6")
+        for lista, codigo in ((y03, "03"), (y53, "53"), (r03, "03"), (y04, "04")):
+            self.assertIn(f"conteúdo no manual: {codigo}", campo_em(lista, 18)[3])
+
     def test_registros_e_segmentos_mapeados(self):
         self.assertEqual(sorted(s.SEGMENTOS), [("Remessa", "P"), ("Remessa", "Q"), ("Remessa", "R"), ("Remessa", "S-1"),
-                                               ("Remessa", "S-2"), ("Retorno", "T"), ("Retorno", "U")])
+                                               ("Remessa", "S-2"), ("Remessa", "Y-03"), ("Remessa", "Y-53"),
+                                               ("Retorno", "T"), ("Retorno", "U"), ("Retorno", "Y-03"),
+                                               ("Retorno", "Y-04")])
         self.assertEqual(sorted(s.REGISTROS), [(t, c) for t in ("Remessa", "Retorno") for c in "0159"])
         for lista in list(s.SEGMENTOS.values()) + list(s.REGISTROS.values()):
             self.assertEqual(lista[0][1], 1)

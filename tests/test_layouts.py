@@ -95,8 +95,10 @@ class RegistroDeLayouts(unittest.TestCase):
 
     def test_layouts_400_e_240(self):
         larguras = {chave: layouts.LAYOUTS[chave].width for chave in layouts.LAYOUT_ORDER}
-        self.assertEqual(larguras, {"febraban": 400, "sicredi": 400, "sicoob400": 400, "santander400": 400, "sicoob240": 240})
+        self.assertEqual(larguras, {"febraban": 400, "sicredi": 400, "sicoob400": 400, "santander400": 400, "sicoob240": 240,
+                                     "santander240": 240})
         self.assertIsNotNone(layouts.LAYOUTS["sicoob240"].structure)
+        self.assertIsNotNone(layouts.LAYOUTS["santander240"].structure)
 
     def test_registros_opcionais_do_santander_400(self):
         registros = layouts.LAYOUTS["santander400"].record_types
@@ -109,6 +111,16 @@ class RegistroDeLayouts(unittest.TestCase):
         self.assertTrue(registros["7"]("Remessa")[0].startswith("Registro 7"))
         for chave in ("febraban", "sicredi", "sicoob400", "sicoob240"):
             self.assertIsNone(layouts.LAYOUTS[chave].record_types, chave)
+
+    def test_chave_do_segmento_no_santander_240(self):
+        chave = layouts.LAYOUTS["santander240"].structure.chave_segmento
+        y03 = " " * 17 + "03" + " " * 221
+        self.assertEqual(chave("Remessa", "Y", y03), "Y-03")
+        self.assertEqual(chave("Retorno", "Y", " " * 17 + "04" + " " * 221), "Y-04")
+        self.assertEqual(chave("Remessa", "S", " " * 17 + "2" + " " * 222), "S-2")
+        self.assertEqual(chave("Remessa", "P", y03), "P")  # só Y e S se subdividem
+        self.assertEqual(chave("Remessa", "Y", "curta"), "Y-")  # linha curta não quebra
+        self.assertIsNone(layouts.LAYOUTS["sicoob240"].structure.chave_segmento)
 
     def test_bancos_conhecidos(self):
         self.assertEqual(febraban.BANK_NAMES["756"], "Sicoob (Bancoob)")
