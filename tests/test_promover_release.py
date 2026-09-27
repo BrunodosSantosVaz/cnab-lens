@@ -26,6 +26,9 @@ case "$1 $2" in
     cp "$FIX/binario" "$dir/CNABLens-$3-windows-x64.exe"
     (cd "$dir" && sha256sum "CNABLens-$3-windows-x64.exe" > SHA256SUMS.txt)
     [ ! -f "$FIX/adulterar" ] || echo adulterado >> "$dir/CNABLens-$3-windows-x64.exe" ;;
+  "release create")  # guarda os arquivos anexados, como a Release os receberia
+    mkdir -p "$FIX/publicado"
+    for a in "$@"; do [ ! -f "$a" ] || [ "$a" = notas.md ] || cp "$a" "$FIX/publicado/"; done ;;
 esac
 exit 0
 '''
@@ -74,12 +77,21 @@ class PromoverRelease(unittest.TestCase):
         r, saidas = self.rodar()
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(sorted(saidas), ["nova=true", "tag=v0.2.0"])
-        exe = os.path.join(self.repo, "releases", "v0.2.0", "CNABLens-v0.2.0-windows-x64.exe")
-        with open(exe, "rb") as f:
+        publicado = os.path.join(self.fix, "publicado")
+        self.assertEqual(sorted(os.listdir(publicado)), ["CNABLens-v0.2.0-windows-x64.exe", "SHA256SUMS.txt"])
+        with open(os.path.join(publicado, "CNABLens-v0.2.0-windows-x64.exe"), "rb") as f:
             self.assertEqual(f.read(), BINARIO)  # nada de recompilar: os bytes são os da candidata
         hash_ = hashlib.sha256(BINARIO).hexdigest()
-        with open(os.path.join(self.repo, "releases", "v0.2.0", "SHA256SUMS.txt"), encoding="utf-8") as f:
+        with open(os.path.join(publicado, "SHA256SUMS.txt"), encoding="utf-8") as f:
             self.assertEqual(f.read().split(), [hash_, "CNABLens-v0.2.0-windows-x64.exe"])
+
+    def test_executavel_fica_so_na_release_e_nada_e_gravado_no_repositorio(self):
+        r, _ = self.rodar()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse(os.path.exists(os.path.join(self.repo, "releases")))
+        self.assertFalse(os.path.exists(os.path.join(self.repo, "baixado")))
+        status = subprocess.run([GIT, "status", "--porcelain"], cwd=self.repo, capture_output=True, text=True).stdout
+        self.assertEqual([l for l in status.splitlines() if not l.endswith("notas.md")], [])
 
     def test_notas_sao_a_secao_da_versao_e_citam_a_candidata(self):
         self.rodar(TARGET_SHA="abc123")
