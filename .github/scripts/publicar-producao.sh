@@ -11,7 +11,7 @@
 #   3. promove a MESMA candidata a vX.Y.Z (Latest), sem recompilar (promover-release.sh);
 #   4. anuncia no Discussions (anunciar-release.sh); o executavel fica so na Release;
 #   5. finaliza: fecha issues, cartoes -> Concluido/Corrigido, epicos -> Concluida, milestone,
-#      e apaga as branches das tarefas (encerrar-sprint.sh); release/* FICA;
+#      e apaga as branches das tarefas e a release/x.y.z, que fica so na tag (encerrar-sprint.sh);
 #   6. devolve a main para a develop (backmerge.sh).
 # Idempotente: se a Release vX.Y.Z ja existe, so refaz os passos 5 e 6 (retomada apos falha).
 #

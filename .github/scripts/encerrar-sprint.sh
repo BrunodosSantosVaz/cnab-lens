@@ -6,8 +6,10 @@
 #     bugs -> Corrigido);
 #   - fecha os epicos cujas sub-issues estao todas concluidas (-> Concluida);
 #   - fecha o milestone;
-#   - apaga as branches feature/bugfix/hotfix ja mescladas. As branches release/x.y.z FICAM (historico
-#     de cada versao); no repositorio sobram main, develop e as release/*.
+#   - apaga as branches feature/bugfix/hotfix ja mescladas;
+#   - apaga a release/x.y.z da versao (apagar-release.sh), so se a tag vX.Y.Z e a Release existem e a
+#     branch esta contida na tag e na main. O historico da versao fica na TAG (padrao GitFlow); no
+#     repositorio sobram main e develop.
 #
 # Variaveis: VERSAO (ex.: v0.6.0 ou 0.6.0), SIMULAR=true (so mostra), PROJETO_*.
 set -euo pipefail
@@ -83,4 +85,7 @@ for ref in $refs; do
   elif gh api -X DELETE "repos/$R/git/refs/heads/$ref" >/dev/null 2>&1; then echo "Branch apagada: $ref"
   else echo "Branch ja nao existe: $ref"; fi
 done
+# ---- branch da release: temporaria (GitFlow); a versao fica na tag. Travas em apagar-release.sh.
+VERSAO="$v" SIMULAR="$SIMULAR" bash "$AQUI/apagar-release.sh" \
+  || echo "::warning::Nao consegui conferir/apagar release/$v (a sprint foi encerrada mesmo assim)."
 echo "Sprint $tag encerrada."
