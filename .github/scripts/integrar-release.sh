@@ -9,6 +9,10 @@
 # e enviado (o PR volta para "Code", sem a label, com um comentario). Modo automatico (AUTO=true,
 # disparado quando um PR recebe a label "aprovado"): se ainda faltam PRs, sai sem erro.
 #
+# PR `sem-executavel` (o PR ou a issue dele tem a label) NUNCA e integrado: nao muda o programa, entao
+# nao gera versao, branch de release nem candidata. Ele e mesclado direto na develop e finalizado por
+# "Publicar sem executavel". Esta trava vale mesmo com a label "aprovado" no PR.
+#
 # Variaveis: VERSAO (v0.6.0; no modo automatico sai do milestone do PR), PR_NUMBER, AUTO, SIMULAR=true,
 # PROJETO_EXECUCAO, PROJETO_BUGS, BRANCH_DEVELOP (develop).
 set -euo pipefail
@@ -23,6 +27,19 @@ projeto() { bash "$AQUI/projeto.sh" "$@"; }
 falta() { # mensagem: no modo automatico e so um aviso
   if [ "$AUTO" = true ]; then echo "::notice::$1"; exit 0; else echo "::error::$1"; exit 1; fi
 }
+
+# ---- trava: PR sem-executavel nao vira versao
+if [ -n "${PR_NUMBER:-}" ]; then
+  rotulos=$(gh api "repos/$R/issues/$PR_NUMBER" --jq '[.labels[].name] | join(",")')
+  head=$(gh api "repos/$R/pulls/$PR_NUMBER" --jq .head.ref)
+  if [[ "$head" =~ ^(feature|bugfix)/([0-9]+)- ]]; then
+    rotulos+=",$(gh api "repos/$R/issues/${BASH_REMATCH[2]}" --jq '[.labels[].name] | join(",")')"
+  fi
+  if [[ ",$rotulos," == *",sem-executavel,"* ]]; then
+    echo "::notice::PR #$PR_NUMBER e sem-executavel (nao muda o programa): nao entra em versao nem em release. Mescle direto na $DEVELOP e finalize com 'Publicar sem executavel'."
+    exit 0
+  fi
+fi
 
 v="${VERSAO:-}"
 if [ -z "$v" ] && [ -n "${PR_NUMBER:-}" ]; then
