@@ -59,7 +59,7 @@ jobs:
           python-version: '3.12'
       - name: Testes dos scripts
         working-directory: tests
-        run: python -m unittest -v test_pr_regras test_conferir_release test_tarefas_do_epico test_slug test_mesclar test_sem_executavel test_promover_release test_publicar_producao test_atualizar_release test_build_exe test_build_linux test_projeto_sprint test_muda_programa test_iniciar_sprint test_criar_branches test_integrar_release
+        run: python -m unittest -v test_pr_regras test_conferir_release test_tarefas_do_epico test_slug test_mesclar test_sem_executavel test_promover_release test_publicar_producao test_atualizar_release test_build_exe test_build_linux test_projeto_sprint test_muda_programa test_iniciar_sprint test_criar_branches test_integrar_release test_apagar_release
 
 
   # Compila o executavel Linux como na release candidata (container manylinux_2_28, glibc 2.28, Python
