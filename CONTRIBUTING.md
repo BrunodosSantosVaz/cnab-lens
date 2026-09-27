@@ -63,8 +63,8 @@ Só o mantenedor mescla, aprova e publica. Você não mexe em versão, `CHANGELO
 é aprovado (label `aprovado`) e todos os PRs da sprint estão aprovados, a esteira monta a release, gera a
 candidata `vX.Y.Z-rc.N` e a leva para homologação; testada e aprovada, é publicada e a sua issue é fechada
 sozinha. Os seus commits mantêm a sua autoria. Não há prazo garantido (projeto mantido em tempo parcial).
-Um PR só entra em uma release se a issue dele estiver em uma sprint (milestone): o mantenedor decide isso.
-Se o PR só mexe em documentação, testes ou automação (nada em `src/` nem em `requirements-build.txt`), ele recebe sozinho a label `sem-executavel`: não passa por homologação nem gera versão nova, e chega à `main` quando o mantenedor roda o botão *Publicar sem executável*.
+Um PR que muda o programa só entra em uma release se a issue dele estiver no milestone de uma versão: o mantenedor decide isso.
+Se o PR só mexe em documentação, testes, automação ou compiladores (nada em `src/` nem em `requirements-build.txt`), ele recebe sozinho a label `sem-executavel`: não entra em versão, não passa por homologação nem pela label `aprovado`, é mesclado pelo mantenedor direto na `develop` e chega à `main` quando ele roda o botão *Publicar sem executável*. Só gera versão (e executável) o que muda o programa; a sprint, que é o período de trabalho, pode não ter versão nenhuma (veja [docs/processo.md](docs/processo.md#sprint-não-é-versão)).
 
 Mensagens de commit: uma linha objetiva, de preferência no formato `tipo: resumo`
 (`feat`, `fix`, `docs`, `test`, `chore`, `refactor`).
