@@ -1,5 +1,5 @@
-# Validacao de todo PR e de push na main/develop, em ambiente limpo (Windows, que
-# e a plataforma do CNABLens). O job "check" e o gate obrigatorio do processo.
+# Validacao de todo PR e de push na main/develop, em ambiente limpo (Windows, onde rodam os testes da
+# interface; e Linux, para os scripts e o build do executavel Linux). O job "check" e o gate obrigatorio.
 name: CI
 
 on:
@@ -59,5 +59,28 @@ jobs:
           python-version: '3.12'
       - name: Testes dos scripts
         working-directory: tests
-        run: python -m unittest -v test_pr_regras test_conferir_release test_tarefas_do_epico test_slug test_mesclar test_sem_executavel test_promover_release test_publicar_producao test_atualizar_release test_build_exe
+        run: python -m unittest -v test_pr_regras test_conferir_release test_tarefas_do_epico test_slug test_mesclar test_sem_executavel test_promover_release test_publicar_producao test_atualizar_release test_build_exe test_build_linux
 
+
+  # Compila o executavel Linux como na release candidata (container manylinux_2_28, glibc 2.28, Python
+  # 3.12 portatil do uv com Tk), para achar problema de build antes da release. Nao e gate obrigatorio.
+  linux:
+    name: build (Linux)
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux_2_28_x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python 3.12 portatil com Tk (uv)
+        run: |
+          /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv
+          /opt/python/cp312-cp312/bin/uv venv -q --python 3.12 --python-preference only-managed /tmp/venv
+          /tmp/venv/bin/python -c "import tkinter"
+          VIRTUAL_ENV=/tmp/venv /opt/python/cp312-cp312/bin/uv pip install -q -r requirements-build.txt
+      - name: Compilar
+        run: /tmp/venv/bin/python linux/build_linux.py --saida build-linux
+      - name: Conferir o executavel
+        run: |
+          cd build-linux && sha256sum -c SHA256SUMS.txt
+          test -x CNABLens-v*-linux-x64
+          # nenhuma dependencia acima da glibc 2.28 (a do container)
+          ! objdump -T CNABLens-v*-linux-x64 | grep -oE 'GLIBC_2\.(29|[3-9][0-9])' | head -n1 | grep .

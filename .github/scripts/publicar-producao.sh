@@ -9,7 +9,7 @@
 #        - conferir-release.sh reprova (sem candidata, ou src/ mudou depois dela, ou sem CHANGELOG);
 #   2. mescla o PR na main (commit "chore(release): merge vX.Y.Z");
 #   3. promove a MESMA candidata a vX.Y.Z (Latest), sem recompilar (promover-release.sh);
-#   4. guarda releases/vX.Y.Z/ (copiar-release.sh) e anuncia no Discussions (anunciar-release.sh);
+#   4. anuncia no Discussions (anunciar-release.sh); o executavel fica so na Release;
 #   5. finaliza: fecha issues, cartoes -> Concluido/Corrigido, epicos -> Concluida, milestone,
 #      e apaga as branches das tarefas (encerrar-sprint.sh); release/* FICA;
 #   6. devolve a main para a develop (backmerge.sh).
@@ -111,7 +111,7 @@ fi
 if [ "$SIMULAR" = true ]; then
   if [ "$ja_publicada" = false ]; then
     [ "$pr_estado" != OPEN ] || echo "[simulado] mesclar PR #$pr_num ($branch -> $MAIN) como 'chore(release): merge $tag'"
-    echo "[simulado] promover $rc_tag a $tag (Latest, sem recompilar) e guardar releases/$tag/"
+    echo "[simulado] promover $rc_tag a $tag (Latest, sem recompilar)"
     echo "[simulado] anunciar $tag no Discussions"
   fi
   VERSAO="$v" SIMULAR=true bash "$AQUI/encerrar-sprint.sh"
@@ -138,7 +138,6 @@ if [ "$ja_publicada" = false ]; then
   GITHUB_OUTPUT=/dev/null bash "$AQUI/conferir-release.sh"
 
   RC_TAG="$rc_tag" TARGET_SHA="$sha" bash "$AQUI/promover-release.sh"
-  TAG="$tag" bash "$AQUI/copiar-release.sh" || echo "::warning::A copia em releases/ nao foi guardada (a Release $tag ja foi publicada)."
   TAG="$tag" bash "$AQUI/anunciar-release.sh" || true
 fi
 
