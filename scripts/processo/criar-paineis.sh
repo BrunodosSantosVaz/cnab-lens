@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Cria os tres paineis (GitHub Projects v2) do processo e liga ao repositorio:
 #   "<Produto> — Planejamento", "<Produto> — Execução", "<Produto> — Bugs".
-# Configura o campo Status (colunas) e os campos extras de cada painel.
+# Configura o campo Status (colunas) e os campos extras de cada painel, inclusive a
+# Sprint (Iteration) em Planejamento e Execucao.
 # Cria as visoes (Quadro por Status, Tabela e, no Planejamento, Roadmap).
 # Os WORKFLOWS (auto-add, item closed), o limite de WIP e o agrupamento da
 # tabela so existem na interface web: veja docs/processo.md.
@@ -41,6 +42,7 @@ definir_status "$OWNER" "$N1" "${STATUS_PLANEJAMENTO[@]}"
 criar_visoes "$OWNER" "$N1" roadmap
 campo_selecao "$N1" "Prioridade" "Alta,Média,Baixa"
 gh project field-create "$N1" --owner "$OWNER" --name "Data-alvo" --data-type DATE >/dev/null 2>&1 || true
+criar_campo_sprint "$OWNER" "$N1"
 
 echo "== Execução =="
 N2=$(criar_painel "$PRODUTO — Execução")
@@ -48,6 +50,7 @@ definir_status "$OWNER" "$N2" "${STATUS_EXECUCAO[@]}"
 criar_visoes "$OWNER" "$N2"
 campo_selecao "$N2" "Prioridade" "Alta,Média,Baixa"
 campo_selecao "$N2" "Estimativa" "P,M,G"
+criar_campo_sprint "$OWNER" "$N2"
 
 echo "== Bugs =="
 N3=$(criar_painel "$PRODUTO — Bugs")
