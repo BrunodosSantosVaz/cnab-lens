@@ -1,8 +1,12 @@
 # Homologacao do CNABLens = uma RELEASE CANDIDATA versionada, sempre criada ANTES de testar.
-# A cada push em release/x.y.z (ou hotfix/*): compila o .exe no CI, atesta a procedencia e cria a
-# pre-release vX.Y.Z-rc.N (rc.1, rc.2, ... a cada correcao) com o .exe e o SHA-256. O dono testa
-# exatamente esse arquivo; aprovando, a acao "Publicar em producao" promove o MESMO binario a
-# producao (vX.Y.Z), sem recompilar. Nada e commitado nesta etapa (o Git guarda so codigo).
+# A cada push em release/x.y.z (ou hotfix/*): compila o .exe (Windows) e o executavel Linux no CI,
+# atesta a procedencia do .exe e cria a pre-release vX.Y.Z-rc.N (rc.1, rc.2, ... a cada correcao) com
+# os dois executaveis e os hashes. O dono testa exatamente esses arquivos; aprovando, a acao
+# "Publicar em producao" promove os MESMOS binarios a producao (vX.Y.Z), sem recompilar. Se um dos
+# dois nao compilar, a candidata nao e criada. Nada e commitado nesta etapa (o Git guarda so codigo).
+#
+# O Linux compila no container manylinux_2_28 (glibc 2.28) com o Python 3.12 portatil do uv (Tk
+# embutido), para rodar em qualquer distro com glibc 2.28 ou mais nova.
 #
 # Em release/x.y.z (criada pelo "Integrar release") ha um segundo job, "homologar": depois da candidata
 # leva a release para a develop, move os cartoes para Homologacao e abre o PR da release para a main.
@@ -28,7 +32,9 @@ jobs:
   candidata:
     runs-on: windows-latest
     outputs:
-      rc_tag: ${{ steps.criar.outputs.rc_tag }}
+      pular: ${{ steps.v.outputs.pular }}
+      versao: ${{ steps.v.outputs.versao }}
+      n: ${{ steps.v.outputs.n }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,41 +73,90 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: rc/*.exe
+      - name: Guardar o .exe para a pre-release
+        if: steps.v.outputs.pular != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidata-windows
+          path: rc/
+          retention-days: 7
+
+  linux:
+    needs: candidata
+    if: ${{ needs.candidata.outputs.pular != 'true' }}
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux_2_28_x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python 3.12 portatil com Tk (uv)
+        run: |
+          /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv
+          /opt/python/cp312-cp312/bin/uv venv -q --python 3.12 --python-preference only-managed /tmp/venv
+          /tmp/venv/bin/python -c "import tkinter"
+          VIRTUAL_ENV=/tmp/venv /opt/python/cp312-cp312/bin/uv pip install -q -r requirements-build.txt
+      - name: Compilar
+        run: |
+          /tmp/venv/bin/python linux/build_linux.py --rc ${{ needs.candidata.outputs.n }} --saida rc-linux
+          mv rc-linux/SHA256SUMS.txt rc-linux/SHA256SUMS-linux.txt
+      - name: Guardar o executavel Linux para a pre-release
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidata-linux
+          path: rc-linux/
+          retention-days: 7
+
+  publicar:
+    needs: [candidata, linux]
+    runs-on: ubuntu-latest
+    outputs:
+      rc_tag: ${{ steps.criar.outputs.rc_tag }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: rc
+          merge-multiple: true
       - name: Criar a pre-release (homologacao)
         id: criar
-        if: steps.v.outputs.pular != 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSAO: ${{ steps.v.outputs.versao }}
-          N: ${{ steps.v.outputs.n }}
+          GH_REPO: ${{ github.repository }}
+          VERSAO: ${{ needs.candidata.outputs.versao }}
+          N: ${{ needs.candidata.outputs.n }}
         run: |
           tag="v${VERSAO}-rc.${N}"
           exe="CNABLens-${tag}-windows-x64.exe"
+          lin="CNABLens-${tag}-linux-x64"
+          (cd rc && sha256sum -c SHA256SUMS.txt && sha256sum -c SHA256SUMS-linux.txt)
           {
             echo "## Release candidata (homologação)"
             echo
-            echo "Esta é uma **pre-release para testar**. **Não é a versão de produção.** Depois de testada e aprovada, este mesmo binário é promovido a \`v${VERSAO}\` (produção), sem recompilar."
+            echo "Esta é uma **pre-release para testar**. **Não é a versão de produção.** Depois de testados e aprovados, estes mesmos binários (Windows e Linux) são promovidos a \`v${VERSAO}\` (produção), sem recompilar."
             echo
             echo "- Branch: \`${GITHUB_REF_NAME}\`"
             echo "- Commit: \`${GITHUB_SHA}\`"
-            echo "- Procedência: \`gh attestation verify ${exe} --repo ${GITHUB_REPOSITORY}\`"
+            echo "- Procedência do \`.exe\`: \`gh attestation verify ${exe} --repo ${GITHUB_REPOSITORY}\`"
             echo
             echo "### Conferir o download"
             echo
             echo '```powershell'
             echo "Get-FileHash .\\${exe} -Algorithm SHA256"
             echo '```'
+            echo
+            echo '```bash'
+            echo "sha256sum -c SHA256SUMS-linux.txt"
+            echo "chmod +x ${lin} && ./${lin}"
+            echo '```'
           } > notas.md
-          gh release create "$tag" "rc/${exe}" rc/SHA256SUMS.txt \
+          gh release create "$tag" "rc/${exe}" rc/SHA256SUMS.txt "rc/${lin}" rc/SHA256SUMS-linux.txt \
             --prerelease --target "$GITHUB_SHA" \
             --title "CNABLens ${tag} (homologação)" --notes-file notas.md
           echo "rc_tag=${tag}" >> "$GITHUB_OUTPUT"
 
   # So em release/x.y.z (nao em hotfix): a candidata existe, entao a release entra na develop.
   homologar:
-    needs: candidata
-    if: ${{ needs.candidata.outputs.rc_tag != '' && startsWith(github.ref_name, 'release/') }}
+    needs: publicar
+    if: ${{ needs.publicar.outputs.rc_tag != '' && startsWith(github.ref_name, 'release/') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -118,7 +173,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
           BRANCH: ${{ github.ref_name }}
-          RC_TAG: ${{ needs.candidata.outputs.rc_tag }}
+          RC_TAG: ${{ needs.publicar.outputs.rc_tag }}
           PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
           PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
           PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}
