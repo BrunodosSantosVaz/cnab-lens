@@ -21,7 +21,8 @@ telemetria. Interessam relatos como:
 - um arquivo malformado que cause execução de código, travamento sério ou consumo excessivo de
   memória ao ser aberto;
 - o executável publicado não corresponder ao código-fonte, ou ter sido adulterado;
-- dependências do processo de build com falhas conhecidas que afetem o `.exe` gerado.
+- dependências do processo de build com falhas conhecidas que afetem os executáveis gerados (Windows
+  ou Linux).
 
 ## Conferindo o executável
 
@@ -32,3 +33,7 @@ telemetria. Interessam relatos como:
   `gh attestation verify CNABLens-vX.Y.Z-windows-x64.exe --repo BrunodosSantosVaz/cnab-lens`.
 - O `.exe` **não é assinado digitalmente**, então o Windows SmartScreen pode avisar. Se preferir,
   compile a partir do código-fonte (veja o [README](README.md)).
+- **Linux:** confira o executável com o `SHA256SUMS-linux.txt` da mesma release
+  (`sha256sum -c SHA256SUMS-linux.txt`). Ele é gerado pelo CI a partir do mesmo código, mas **ainda não
+  tem atestado de procedência** nem assinatura: se preferir, compile com `bash linux/compilar.sh`
+  (veja [`linux/README.md`](linux/README.md)).

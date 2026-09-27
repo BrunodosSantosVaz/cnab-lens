@@ -25,7 +25,7 @@ por fictícios ou informe apenas as posições e os valores envolvidos. Os arqui
 ## Ambiente de desenvolvimento
 
 Requer **Python 3.10 ou superior com Tkinter** (o instalador oficial do Python para Windows já
-inclui). O programa não usa bibliotecas externas.
+inclui; no Linux, instale o pacote `tk`/`python3-tk` da distro). O programa não usa bibliotecas externas.
 
 ```powershell
 git clone https://github.com/BrunodosSantosVaz/cnab-lens.git
@@ -35,6 +35,16 @@ python -m unittest discover -s tests -v            # testes
 pip install -r requirements-build.txt              # só para gerar o .exe
 python scripts\build_exe.py                        # gera em build-local/ (ignorada pelo Git)
 ```
+
+No Linux, o executável é compilado dentro de um container (precisa de Docker), para rodar em qualquer
+distro. Detalhes em [`linux/README.md`](linux/README.md):
+
+```bash
+bash linux/compilar.sh                             # gera em build-local/ (ignorada pelo Git)
+```
+
+Mudanças em `scripts/build_exe.py` ou `linux/build_linux.py` devem manter os dois compiladores com as
+mesmas opções de empacotamento (o mesmo programa nos dois sistemas).
 
 ## Fluxo de trabalho
 

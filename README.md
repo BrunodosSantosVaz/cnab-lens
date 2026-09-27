@@ -2,13 +2,13 @@
 
 **Uma lente para arquivos CNAB.** Abra um arquivo de **remessa** ou **retorno** de cobrança bancária
 (CNAB400 ou CNAB240) e veja cada lançamento com **o nome correto de cada campo**, a posição no layout, o
-valor e a descrição oficial. Aplicativo Windows, roda 100% no seu computador, sem instalação.
+valor e a descrição oficial. Aplicativo para **Windows e Linux**, roda 100% no seu computador, sem instalação.
 
 [![CI](https://github.com/BrunodosSantosVaz/cnab-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/BrunodosSantosVaz/cnab-lens/actions/workflows/ci.yml)
 [![Produção](https://img.shields.io/github/v/release/BrunodosSantosVaz/cnab-lens?label=produ%C3%A7%C3%A3o&color=success)](https://github.com/BrunodosSantosVaz/cnab-lens/releases/latest)
 [![Homologação](https://img.shields.io/github/v/release/BrunodosSantosVaz/cnab-lens?include_prereleases&label=homologa%C3%A7%C3%A3o&color=orange)](https://github.com/BrunodosSantosVaz/cnab-lens/releases)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
-![Plataforma](https://img.shields.io/badge/plataforma-Windows%2010%2F11-lightgrey)
+![Plataforma](https://img.shields.io/badge/plataforma-Windows%2010%2F11%20%7C%20Linux-lightgrey)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 
 ![Tela do CNABLens lendo um retorno CNAB240 do Sicoob](docs/imagens/tela-cnab240.png)
@@ -66,21 +66,41 @@ números. Este programa faz a leitura por você:
 
 **Não precisa instalar nada** (nem Python).
 
-1. Baixe o executável da versão mais recente na página de
-   [**Releases**](https://github.com/BrunodosSantosVaz/cnab-lens/releases/latest) (por exemplo,
-   `CNABLens-v0.1.0-windows-x64.exe`): a marcada **Latest** é a versão de **produção**. As versões de
-   produção também ficam com cópia no repositório, em [`releases/`](releases/).
+Os executáveis ficam na página de
+[**Releases**](https://github.com/BrunodosSantosVaz/cnab-lens/releases/latest). A marcada **Latest** é a
+versão de **produção**, e cada versão traz os dois sistemas:
+
+| Sistema | Arquivo | Hash |
+|---------|---------|------|
+| Windows 10/11, 64 bits | `CNABLens-vX.Y.Z-windows-x64.exe` | `SHA256SUMS.txt` |
+| Linux x86_64 (glibc 2.28+: Ubuntu 20.04+, Debian 10+, Fedora, Mint, Manjaro…) | `CNABLens-vX.Y.Z-linux-x64` | `SHA256SUMS-linux.txt` |
+
+### Windows
+
+1. Baixe o `.exe` da versão mais recente.
 2. *(Recomendado)* confira o hash no PowerShell e compare com o `SHA256SUMS.txt` da mesma release:
 
    ```powershell
-   Get-FileHash .\CNABLens-v0.1.0-windows-x64.exe -Algorithm SHA256
+   Get-FileHash .\CNABLens-v0.2.0-windows-x64.exe -Algorithm SHA256
    ```
 
 3. Dê dois cliques no `.exe`.
 
-**Requisitos:** Windows 10 ou 11, 64 bits.
+### Linux
 
-*Verificação avançada:* os executáveis compilados pelo CI têm **atestado de procedência** (prova de que
+1. Baixe o `CNABLens-vX.Y.Z-linux-x64` e o `SHA256SUMS-linux.txt` da mesma release.
+2. Confira o hash, dê permissão de execução e abra (ou dê dois cliques no arquivo):
+
+   ```bash
+   sha256sum -c SHA256SUMS-linux.txt
+   chmod +x CNABLens-v0.2.0-linux-x64
+   ./CNABLens-v0.2.0-linux-x64
+   ```
+
+Não precisa instalar Python nem Tk: vai tudo dentro do executável. Detalhes, distros suportadas e como
+compilar no Linux estão em [`linux/README.md`](linux/README.md).
+
+*Verificação avançada:* os `.exe` compilados pelo CI têm **atestado de procedência** (prova de que
 foram gerados por este repositório, naquele commit): `gh attestation verify CNABLens-vX.Y.Z-windows-x64.exe --repo BrunodosSantosVaz/cnab-lens`.
 
 > **Aviso do Windows / antivírus.** O executável **não é assinado digitalmente**, então o SmartScreen
@@ -202,11 +222,14 @@ cnab-lens/
 │   └── version.py                Versão do programa
 ├── tests/                        Testes automatizados (unittest)
 ├── scripts/
-│   ├── build_exe.py              Compila o .exe (build local; as versões oficiais saem do CI)
+│   ├── build_exe.py              Compila o .exe do Windows (build local; as versões oficiais saem do CI)
 │   ├── gerar_exemplos.py         Gera os arquivos fictícios de exemplos/
 │   └── processo/                 Configuração do GitHub (labels, painéis, automações)
+├── linux/
+│   ├── build_linux.py            Compila o executável Linux (mesmas opções do build_exe.py)
+│   ├── compilar.sh               Compila no container manylinux_2_28, para rodar em qualquer distro
+│   └── README.md                 Baixar, rodar e compilar no Linux
 ├── exemplos/                     Arquivos CNAB fictícios de exemplo
-├── releases/                     Cópias das versões de produção (vX.Y.Z/ + SHA256SUMS.txt)
 ├── docs/                         Processo de desenvolvimento e imagens do README
 ├── .github/                      Workflows (CI, build, release), modelos de issue/PR, automações
 ├── requirements-build.txt        Dependência de build (PyInstaller)
@@ -217,7 +240,8 @@ cnab-lens/
 ### Rodando a partir do código-fonte
 
 Requer **Python 3.10 ou superior com Tkinter** (o instalador oficial do Python para Windows já
-inclui). Nenhuma biblioteca externa é necessária para rodar.
+inclui; no Linux, instale o pacote `tk`/`python3-tk` da sua distro). Nenhuma biblioteca externa é
+necessária para rodar.
 
 ```powershell
 git clone https://github.com/BrunodosSantosVaz/cnab-lens.git
@@ -233,9 +257,11 @@ python -m unittest discover -s tests -v
 
 A suíte cobre as tabelas de layout, a leitura dos arquivos de exemplo (400 e 240), a formatação de valores
 e datas e a interface (cópia de valores, alinhamento, troca de layout). Ela roda a cada pull request no
-GitHub Actions (Windows).
+GitHub Actions (Windows), e o executável Linux é compilado a cada pull request.
 
 ### Gerando o executável
+
+**Windows:**
 
 ```powershell
 pip install -r requirements-build.txt
@@ -244,8 +270,20 @@ python scripts\build_exe.py
 
 O script compila com PyInstaller (fora do repositório, sem deixar `build/` ou `.spec`), embute os
 metadados de versão no `.exe` e grava o resultado, com o `SHA256SUMS.txt`, em `build-local/` (ignorada
-pelo Git). A versão vem de `src/version.py`. Os executáveis **oficiais** (candidatas e produção) são
-gerados pelo CI e publicados nas Releases, não à mão.
+pelo Git). A versão vem de `src/version.py`.
+
+**Linux** (precisa de Docker; veja [`linux/README.md`](linux/README.md)):
+
+```bash
+bash linux/compilar.sh           # versão atual
+bash linux/compilar.sh v0.2.0    # a partir de uma tag
+```
+
+Compila dentro de um container antigo (glibc 2.28), para o executável rodar em qualquer distro, e grava
+`CNABLens-vX.Y.Z-linux-x64` e o `SHA256SUMS.txt` em `build-local/`.
+
+Os executáveis **oficiais** (candidatas e produção, Windows e Linux) são gerados pelo CI e publicados
+nas Releases, não à mão.
 
 ### Como o programa funciona
 
@@ -279,7 +317,7 @@ O projeto usa [versionamento semântico](https://semver.org/lang/pt-BR/) (`MAIOR
 versão é registrada no [CHANGELOG](CHANGELOG.md). Antes da 1.0, `MENOR` sobe com funcionalidade nova e
 `PATCH` com correção.
 
-**A versão diz o ambiente**, e todos os `.exe` ficam no mesmo lugar, a página de
+**A versão diz o ambiente**, e todos os executáveis (Windows e Linux) ficam no mesmo lugar, a página de
 [Releases](https://github.com/BrunodosSantosVaz/cnab-lens/releases):
 
 | Ambiente | Como reconhecer | Badge |
@@ -287,13 +325,13 @@ versão é registrada no [CHANGELOG](CHANGELOG.md). Antes da 1.0, `MENOR` sobe c
 | **Produção** | release **Latest**, versão `X.Y.Z` | *produção* |
 | **Homologação** | **Pre-release** `X.Y.Z-rc.N` (release candidata) | *homologação* |
 
-Toda homologação tem versão: antes de testar, o CI cria a candidata `vX.Y.Z-rc.N`. Aprovada, o **mesmo
-binário** é promovido a produção (`vX.Y.Z`) pela ação *Publicar em produção*, com a aprovação do mantenedor. Enquanto não há candidata
+Toda homologação tem versão: antes de testar, o CI cria a candidata `vX.Y.Z-rc.N` com o `.exe` e o
+executável Linux. Aprovada, os **mesmos binários** são promovidos a produção (`vX.Y.Z`) pela ação *Publicar em produção*, com a aprovação do mantenedor. Enquanto não há candidata
 aberta, a homologação é a própria versão em produção. As pre-releases são para quem quer ajudar a
 testar: para uso normal, baixe a versão **Latest**. Mudanças que **não alteram o programa** (documentação, testes,
 automação) levam a label `sem-executavel`: não geram versão nem candidata e chegam à `main` pelo botão
-*Publicar sem executável*. As cópias das versões de produção também ficam no
-repositório, em [`releases/`](releases/) (uma pasta por versão, com o `.exe` e o `SHA256SUMS.txt`). O ciclo
+*Publicar sem executável*. Os executáveis ficam **só nas Releases**: o repositório guarda o código,
+e cada versão pode ser recompilada a partir da sua tag. O ciclo
 completo (planejamento, testes, build no CI, aprovação e publicação) está em
 [docs/processo.md](docs/processo.md).
 
@@ -306,7 +344,8 @@ completo (planejamento, testes, build no CI, aprovação e publicação) está e
   Para relatar um problema, substitua os dados por fictícios ou envie só as posições e os valores
   envolvidos, sem identificação de pessoas.
 - **Executável não assinado.** Confira o SHA-256 (veja [Download](#download-e-instalação)) ou compile
-  a partir do código-fonte.
+  a partir do código-fonte. O `.exe` também tem atestado de procedência; o executável Linux, por
+  enquanto, só o SHA-256.
 - **Encontrou uma vulnerabilidade?** Não publique detalhes em uma issue aberta: veja a
   [política de segurança](SECURITY.md) e use o relato privado do GitHub.
 
@@ -336,6 +375,9 @@ completo (planejamento, testes, build no CI, aprovação e publicação) está e
   abra uma issue.
 - O programa lê um arquivo por vez e não valida regras de negócio (dígito verificador, soma do
   trailer etc.): ele **interpreta**, não **audita**.
+- **Linux**: o executável é só para x86_64 e distros com glibc 2.28 ou mais nova. A interface usa X11
+  (em Wayland, pelo XWayland, que vem ligado por padrão no GNOME e no KDE). As fontes podem ficar um
+  pouco diferentes das do Windows (a fonte Segoe UI não existe no Linux e o sistema usa outra parecida).
 
 ## Contribuindo
 
