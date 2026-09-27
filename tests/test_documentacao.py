@@ -31,6 +31,14 @@ class Documentacao(unittest.TestCase):
             with self.subTest(doc=doc):
                 self.assertNotRegex(texto, r"(?<![\w/])releases/(?!latest)")
 
+    def test_milestone_e_so_versao_real(self):
+        for doc in DOCUMENTOS:
+            with self.subTest(doc=doc):
+                self.assertNotRegex(self.ler(doc), r"v\d+\.\d+\.\d+-nc")
+        processo = self.ler("docs/processo.md")
+        self.assertIn("## Sprint não é versão", processo)
+        self.assertIn("Milestone é só versão real", processo)
+
     def test_linux_documentado_no_readme(self):
         readme = self.ler("README.md")
         for trecho in ("linux/README.md", "CNABLens-vX.Y.Z-linux-x64", "SHA256SUMS-linux.txt", "bash linux/compilar.sh"):

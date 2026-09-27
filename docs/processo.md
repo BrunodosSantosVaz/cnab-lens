@@ -84,12 +84,33 @@ O `.exe` é compilado por `scripts/build_exe.py` no Windows do CI. O executável
 `quay.io/pypa/manylinux_2_28_x86_64` (glibc 2.28), para rodar em qualquer distro com glibc 2.28 ou mais
 nova. Para compilar localmente: `bash linux/compilar.sh` (veja [`linux/README.md`](../linux/README.md)).
 
+## Sprint não é versão
+
+Segue o padrão do mercado: **sprint** é um período de trabalho; **versão** é o que é entregue.
+
+| | O que é | Onde fica |
+|---|---|---|
+| **Sprint** | período de trabalho (2 semanas), com ou sem versão | campo **Sprint** (*Iteration*) dos painéis Planejamento e Execução |
+| **Versão** | o programa compilado que muda (`vX.Y.Z`) | **milestone** `vX.Y.Z`, tag e GitHub Release |
+
+- **Só gera versão o que muda o programa** (`src/` ou `requirements-build.txt`). Documentação, testes, esteira e
+  compiladores não geram versão nem executável: é a label **`sem-executavel`**.
+- **Milestone é só versão real.** Não existe milestone de sprint nem milestone "sem compilar".
+- Os executáveis são sempre os da **última versão real**.
+- Uma sprint pode ter só épicos `sem-executavel` (**sprint sem versão**: nenhum milestone, nada compilado), só
+  épicos que mudam o programa (sprint com versão) ou os dois (**sprint mista**: o milestone vale só para as
+  tarefas que mudam o programa).
+
+O épico diz no formulário se **muda o programa**. Com "Não", ele nasce com a label `sem-executavel`, e as tarefas
+dele também. A label pode ser posta ou tirada à mão depois; a esteira respeita o estado atual. Épico antigo, sem
+essa resposta, é tratado como "muda o programa" (o caminho seguro, que exige versão).
+
 ## Painéis (GitHub Projects)
 
 | Painel | Para quê | Colunas |
 |--------|----------|---------|
-| **CNABLens — Planejamento** | épicos, do brainstorm à sprint | Brainstorm → Backlog → Backlog Refinement → Validar protótipo → Próxima sprint → Em desenvolvimento → Concluída |
-| **CNABLens — Execução** | tarefas, da branch à produção | A fazer → Feature → Code → CI/PR → Homologação → Aprovado / Reprovado → Concluído |
+| **CNABLens — Planejamento** | épicos, do brainstorm à sprint (campo **Sprint**) | Brainstorm → Backlog → Backlog Refinement → Validar protótipo → Próxima sprint → Em desenvolvimento → Concluída |
+| **CNABLens — Execução** | tarefas, da branch à produção (campos **Sprint** e **Milestone**) | A fazer → Feature → Code → CI/PR → Homologação → Aprovado / Reprovado → Concluído |
 | **CNABLens — Bugs** | planejamento e execução juntos | Novo → Em correção → CI/PR → Homologação → Aprovado / Reprovado → Corrigido |
 
 | Coluna | Significa | Quem move |
@@ -177,27 +198,39 @@ Os formulários *Épico* e *Tarefa* existem para o planejamento do mantenedor; q
 
 Quem contribui **não pode** mesclar, aprovar, pôr labels, mover cartões, rodar os botões, aprovar o
 ambiente `producao` nem empurrar direto na `main`/`develop`. O PR só entra em uma release se a issue dele
-estiver em uma **sprint (milestone)**; sem milestone, a integração responde "nada a integrar" e o
-mantenedor decide entre encaixá-la em uma sprint ou mesclar na `develop` à mão.
+estiver no **milestone de uma versão**; sem milestone, a integração responde "nada a integrar" e o
+mantenedor decide entre encaixá-la em uma versão ou mesclar na `develop` à mão. PR `sem-executavel` nunca entra
+em versão: é mesclado direto na `develop`.
 
 ## Ciclo de uma sprint, passo a passo
 
 ### 1. Épico → sprint (humano)
 Ideia em *Brainstorm*, refinada até ter escopo, critérios de aceite, plano de testes e a lista **Tarefas
-previstas** (uma por linha, cada uma cabendo em um PR pequeno). O dono arrasta os épicos escolhidos para
+previstas** (uma por linha, cada uma cabendo em um PR pequeno). O formulário pergunta se o épico **muda o
+programa** (com "Não", ele recebe a label `sem-executavel`). O dono arrasta os épicos escolhidos para
 *Próxima sprint*.
 
 ### 2. Iniciar sprint (botão)
-`Iniciar sprint` cria o milestone `vX.Y.Z`, pega **todos** os épicos de *Próxima sprint*, move-os para
-*Em desenvolvimento* e cria, para cada um, as tarefas da lista *Tarefas previstas* (sub-issues `task`
-ligadas ao épico e ao milestone, cartão em *A fazer*). Épico sem a lista fica onde está, com um aviso.
-Rodar de novo não duplica nada.
+`Iniciar sprint` pega **todos** os épicos de *Próxima sprint*, move-os para *Em desenvolvimento*, põe épicos e
+tarefas na **Sprint** (a atual, ou a do campo `sprint`) e cria, para cada épico, as tarefas da lista *Tarefas
+previstas* (sub-issues `task`, cartão em *A fazer*). Épico sem a lista fica onde está, com um aviso. Rodar de
+novo não duplica nada.
+
+A **versão** (`versao=vX.Y.Z`) só é usada pelos épicos que mudam o programa:
+
+| Épicos na *Próxima sprint* | `versao` | Resultado |
+|---|---|---|
+| Só `sem-executavel` | vazia | **sprint sem versão**: nenhum milestone; tarefas com a label `sem-executavel` |
+| Só `sem-executavel` | informada | a versão é ignorada, com aviso; nenhum milestone |
+| Algum que muda o programa | vazia | **recusa** sem criar nada (diz quais épicos precisam de versão) |
+| Misto | informada | milestone `vX.Y.Z` (criado se não existe) só nas tarefas dos épicos que mudam o programa |
 
 ### 3. Criar branches (botão)
 `Criar branches das tarefas` cria `feature/<n>-<slug>` (ou `bugfix/…`) a partir da `develop` para cada
-cartão de tarefa em *A fazer* (bug em *Novo*) **que já está em um milestone**, e move o cartão para
-*Feature*. Cartões *Reprovado* também entram: a branch é recriada e o cartão volta para *Code*.
-Tarefa de backlog (sem milestone) é ignorada.
+cartão de tarefa em *A fazer* (bug em *Novo*) **que já está em um milestone** (ou, se `sem-executavel`, **numa
+Sprint**) e move o cartão para *Feature*. Cartões *Reprovado* também entram: a branch é recriada e o cartão
+volta para *Code*. Tarefa de backlog (sem milestone e, se `sem-executavel`, sem Sprint) é ignorada. Os campos
+`versao` e `sprint` limitam a uma versão ou a uma Sprint.
 
 ### 4. Desenvolver e abrir o PR (dev ou IA, automático nos cartões)
 Commits na branch (com testes), push (cartão → *Code*), PR para a `develop` com `Refs #n` (cartão →
@@ -266,6 +299,8 @@ como parte do binário nas releases normais.)
 
 ### Como a label é aplicada
 
+- **No planejamento**: o épico criado com "Muda o programa? Não" recebe a label, e o *Iniciar sprint* a repassa
+  para as tarefas dele (sem milestone).
 - **Automática**: a **Regras do PR** olha o diff. PR que não toca `src/` nem `requirements-build.txt` recebe a label
   no PR **e na issue** ligada; se depois passar a tocar, a label é retirada dos dois.
 - **À mão**: você pode pôr ou tirar a label numa issue (ex.: uma issue antiga).
@@ -279,7 +314,19 @@ como parte do binário nas releases normais.)
 | Notas da release (`CHANGELOG.md`) | entra na lista | **fora** (não muda o programa) |
 | Finalização | *Publicar em produção* | *Publicar sem executável* (ou junto com a release) |
 
-O PR `sem-executavel` pode ser mesclado por você direto na `develop`, sem esperar a integração da release.
+O PR `sem-executavel` **não leva a label `aprovado`**: você revisa e mescla direto na `develop`, sem esperar a
+integração da release. A `develop` exige PR e os checks `check` e `regras` verdes, sem aprovação de revisão.
+Mesmo que alguém ponha `aprovado`, o *Integrar release* reconhece o PR `sem-executavel` e não cria versão.
+
+**Como mesclar vários PRs da mesma sprint:** use *Create a merge commit* (não *Squash*), na ordem das
+dependências. Se um PR ficou desatualizado depois do merge anterior, use *Update branch* e espere a CI.
+
+**Sprint sem versão, do início ao fim:**
+1. Épicos com "Muda o programa? Não" em *Próxima sprint*.
+2. `Iniciar sprint` **sem** `versao` → tarefas em *A fazer*, na Sprint, sem milestone.
+3. `Criar branches` → `feature/<n>-<slug>`, cartões em *Feature*.
+4. Commits e PRs para a `develop` (cartões em *Code* e *CI/PR*); você mescla, e os cartões vão para *Aprovado*.
+5. `Publicar sem executável` → a `main` avança, as issues fecham e o épico conclui. Sem versão, candidata ou Release.
 
 ### Publicar sem executável (botão)
 
@@ -322,9 +369,9 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 | `CodeQL` | PR, push, semanal | análise estática |
 | `Regras do PR` | PR | nome de branch, destino, `Refs #n`, aviso de falta de teste |
 | `Kanban automático` | issue, push, PR | move os cartões; conclui tarefa e épico quando a issue fecha |
-| `Iniciar sprint` | **botão** | milestone, épicos → *Em desenvolvimento*, cria tarefas |
-| `Criar branches das tarefas` | **botão** | `feature/*`/`bugfix/*` a partir da `develop` |
-| `Integrar release` | label `aprovado` no PR ou **botão** | `release/x.y.z`, merges, versão e CHANGELOG |
+| `Iniciar sprint` | **botão** | épicos → *Em desenvolvimento*, Sprint, cria tarefas; milestone só para épicos que mudam o programa |
+| `Criar branches das tarefas` | **botão** | `feature/*`/`bugfix/*` a partir da `develop` (tarefas com milestone ou `sem-executavel` na Sprint) |
+| `Integrar release` | label `aprovado` no PR ou **botão** | `release/x.y.z`, merges, versão e CHANGELOG (ignora PRs `sem-executavel`) |
 | `Build release candidata` | push em `release/**`, `hotfix/**` | testes, `.exe` e executável Linux, pre-release `rc.N`; depois homologação |
 | `Publicar em produção` | **botão** | portão, merge na `main`, promove (Windows e Linux), anúncio, finaliza, back-merge |
 | `Publicar sem executável` | **botão** | portão (nada de programa mudou), avança a `main` até a `develop`, fecha as issues `sem-executavel` em *Aprovado* |
@@ -334,7 +381,8 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 | `Build de tarefa` | merge na `develop` | artefato temporário para testar a tarefa |
 
 Os botões rodam pela aba **Actions** ou por
-`gh workflow run <arquivo>.yml -f versao=v0.2.0 -f simular=false`. **Rode antes com `simular=true`**
+`gh workflow run <arquivo>.yml -f versao=v0.2.0 -f simular=false` (sprint sem versão: sem o `-f versao`).
+**Rode antes com `simular=true`**
 (padrão): o script só mostra o que faria.
 
 ## Testes automáticos em cada etapa
@@ -389,6 +437,10 @@ preciso se um push da esteira alterar arquivos de `.github/workflows/`), com val
 Ele é usado para mover cartões, criar branches, empurrar a `release/x.y.z` (o que dispara a candidata),
 mesclar o PR da release e fazer o back-merge: os últimos passos empurram
 em branches protegidas, e o dono é admin e contorna o ruleset.
+
+**Campo Sprint**: painéis novos já nascem com ele (`criar-paineis.sh`). Em painéis que já existem, rode uma vez
+`scripts/processo/criar-campo-sprint.sh OWNER N_PLANEJAMENTO N_EXECUCAO N_BUGS` (cria a *Iteration* de 2 semanas e
+a mostra nas visões). Novas sprints são acrescentadas em *Settings* do painel → *Sprint*.
 
 **Painel Planejamento**: na interface, desligue *Auto-add sub-issues to project* (vem ligado e traria as
 tarefas para dentro do quadro de épicos).
