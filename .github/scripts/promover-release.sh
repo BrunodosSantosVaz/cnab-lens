@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Promove a release candidata (RC_TAG) a versao de producao SEM recompilar: baixa o binario da candidata,
-# confere o hash, grava releases/vX.Y.Z/ (no diretorio de trabalho) e cria a tag + GitHub Release vX.Y.Z
-# com esse MESMO binario (SHA-256 identico) e as notas da secao da versao no CHANGELOG.
+# confere o hash e cria a tag + GitHub Release vX.Y.Z com esse MESMO binario (SHA-256 identico) e as
+# notas da secao da versao no CHANGELOG. O executavel fica so na Release: nada e gravado no repositorio
+# (os arquivos sao preparados numa pasta temporaria).
 # Deixa notas.md no diretorio de trabalho (usado por anunciar-release.sh).
 #
 # Variaveis: RC_TAG, GH_TOKEN, GITHUB_REPOSITORY, TARGET_SHA (commit da tag; padrao HEAD),
@@ -23,12 +24,15 @@ fi
 
 rc_exe="CNABLens-${rc}-windows-x64.exe"
 exe="CNABLens-${tag}-windows-x64.exe"
-mkdir -p baixado "releases/${tag}"
-gh release download "$rc" --dir baixado --pattern "$rc_exe" --pattern SHA256SUMS.txt
-(cd baixado && sha256sum -c SHA256SUMS.txt)
-cp "baixado/${rc_exe}" "releases/${tag}/${exe}"
-(cd "releases/${tag}" && sha256sum "$exe" > SHA256SUMS.txt)
-hash=$(cut -d' ' -f1 "releases/${tag}/SHA256SUMS.txt")
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+baixado="$tmp/baixado" pub="$tmp/publicar"
+mkdir -p "$baixado" "$pub"
+gh release download "$rc" --dir "$baixado" --pattern "$rc_exe" --pattern SHA256SUMS.txt
+(cd "$baixado" && sha256sum -c SHA256SUMS.txt)
+cp "${baixado}/${rc_exe}" "${pub}/${exe}"
+(cd "$pub" && sha256sum "$exe" > SHA256SUMS.txt)
+hash=$(cut -d' ' -f1 "${pub}/SHA256SUMS.txt")
 
 # Notas: secao da versao no CHANGELOG + prova de que e o binario da candidata.
 awk -v v="$versao" '
@@ -48,7 +52,7 @@ awk -v v="$versao" '
   echo "Procedência: \`gh attestation verify ${exe} --repo ${GITHUB_REPOSITORY:-dono/repo}\`"
 } >> notas.md
 
-gh release create "$tag" "releases/${tag}/${exe}" "releases/${tag}/SHA256SUMS.txt" \
+gh release create "$tag" "${pub}/${exe}" "${pub}/SHA256SUMS.txt" \
   --target "$alvo" --title "CNABLens ${tag}" --notes-file notas.md $latest
 saida "nova=true"; saida "tag=$tag"
 echo "Publicada: $tag (mesmo binario de $rc)."

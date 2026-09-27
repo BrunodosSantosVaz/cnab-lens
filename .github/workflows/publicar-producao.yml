@@ -1,7 +1,7 @@
 # "Publicar em producao": o botao final da esteira. Depois de testar a candidata em homologacao e
 # marcar cada cartao como "Aprovado", esta acao confere o portao (todos aprovados, nenhum reprovado,
 # PR da release limpo, candidata testada com codigo identico), mescla release/x.y.z na main, promove a
-# MESMA candidata a vX.Y.Z (Latest, sem recompilar), guarda releases/vX.Y.Z/, anuncia no Discussions,
+# MESMA candidata a vX.Y.Z (Latest, sem recompilar), anuncia no Discussions,
 # finaliza tudo (issues, cartoes, epicos, milestone, branches das tarefas; so main, develop e
 # release/* ficam) e devolve a main para a develop.
 #

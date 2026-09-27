@@ -4,8 +4,8 @@
 #
 # Nao recompila: baixa o binario da ultima candidata (vX.Y.Z-rc.N, ja testada em homologacao),
 # confere o hash, e cria a tag + GitHub Release vX.Y.Z (Latest) com esse MESMO arquivo. O
-# conferir-release.sh garante que existe candidata e que o codigo nao mudou depois dela. Por fim
-# guarda a copia em releases/vX.Y.Z/ (commit na main com o token do dono, que e admin).
+# conferir-release.sh garante que existe candidata e que o codigo nao mudou depois dela. O executavel
+# fica so na Release (nada e commitado no repositorio).
 # Depois, anuncia a versao na categoria Anuncios do Discussions; e "Pos-publicacao da release"
 # move os cartoes e devolve a main para a develop.
 name: Publicar release
@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   publicar:
-    # ignora os commits automaticos de release (copia do executavel e merge feito pela acao "Publicar em producao")
+    # ignora os commits automaticos de release (merge feito pela acao "Publicar em producao")
     if: "${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}"
     runs-on: ubuntu-latest
     environment: producao
@@ -35,8 +35,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # PAT do dono (admin): o commit de copia empurra na main, protegida por ruleset.
-          token: ${{ secrets.PROJETO_TOKEN || github.token }}
       - name: Conferir a release candidata
         id: rc
         run: bash .github/scripts/conferir-release.sh
@@ -46,12 +44,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RC_TAG: ${{ steps.rc.outputs.rc_tag }}
         run: bash .github/scripts/promover-release.sh
-      - name: Guardar a copia em releases/
-        if: steps.pub.outputs.nova == 'true'
-        continue-on-error: true
-        env:
-          TAG: ${{ steps.pub.outputs.tag }}
-        run: bash .github/scripts/copiar-release.sh
       - name: Anunciar no Discussions
         if: steps.pub.outputs.nova == 'true'
         continue-on-error: true   # o anuncio nunca deve desfazer uma publicacao ja feita
