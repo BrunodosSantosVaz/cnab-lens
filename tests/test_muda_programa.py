@@ -37,6 +37,16 @@ class MudaPrograma(unittest.TestCase):
     def test_crlf_do_github(self):
         self.assertEqual(self.ler(self.corpo("Não: docs").replace("\n", "\r\n")), "nao")
 
+    def test_corpo_grande_nao_quebra_o_pipe(self):
+        # regressao: com "exit" no awk, um corpo maior que o buffer do pipe fazia o tr morrer com
+        # SIGPIPE (exit 141) e o Kanban falhava sem aplicar a label (epico #45)
+        corpo = self.corpo("Não: docs") + ("linha de detalhamento do épico " * 8 + "\n") * 1000
+        self.assertGreater(len(corpo.encode("utf-8")), 200_000)
+        self.assertEqual(self.ler(corpo), "nao")  # ler() confere o codigo de saida 0
+
+    def test_primeira_resposta_vale(self):
+        self.assertEqual(self.ler(self.corpo("Não: docs\nSim: outra linha")), "nao")
+
     def test_opcoes_do_formulario_sao_as_que_o_leitor_entende(self):
         with open(FORMULARIO, encoding="utf-8") as f:
             texto = f.read()
