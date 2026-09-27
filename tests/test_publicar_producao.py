@@ -65,7 +65,7 @@ class PublicarProducao(unittest.TestCase):
         os.makedirs(self.scripts)
         for nome in ("publicar-producao.sh", "conferir-release.sh"):
             shutil.copy(os.path.join(SCRIPTS, nome), self.scripts)
-        for nome in ("promover-release.sh", "copiar-release.sh", "anunciar-release.sh", "encerrar-sprint.sh", "backmerge.sh"):
+        for nome in ("promover-release.sh", "anunciar-release.sh", "encerrar-sprint.sh", "backmerge.sh"):
             escrever_exec(os.path.join(self.scripts, nome), ETAPA_FALSA)
         escrever_exec(os.path.join(self.scripts, "projeto.sh"), PROJETO_FALSO)
 
@@ -256,7 +256,7 @@ class PublicarProducao(unittest.TestCase):
         self.assertEqual(r.returncode, 0, saida)
         etapas = [c for c in self.chamadas() if c.startswith("etapa ") or c.startswith("gh pr merge")]
         nomes = [c.split()[1] if c.startswith("etapa") else "merge" for c in etapas]
-        self.assertEqual(nomes, ["merge", "promover-release.sh", "copiar-release.sh", "anunciar-release.sh",
+        self.assertEqual(nomes, ["merge", "promover-release.sh", "anunciar-release.sh",
                                  "encerrar-sprint.sh", "backmerge.sh"])
         merge = next(c for c in etapas if c.startswith("gh pr merge"))
         self.assertIn("--merge --admin", merge)
