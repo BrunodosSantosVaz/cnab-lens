@@ -32,7 +32,8 @@ manter() { echo "::warning::$branch mantida: $1."; exit 0; }
 if ! gh api "repos/$R/git/ref/heads/$branch" >/dev/null 2>&1; then
   echo "Branch $branch ja nao existe: nada a apagar."; exit 0
 fi
-echo "Conferindo $branch antes de apagar${SIMULAR/true/ [SIMULACAO]}:"
+sufixo=""; [ "$SIMULAR" != true ] || sufixo=" [SIMULACAO]"
+echo "Conferindo $branch antes de apagar${sufixo}:"
 
 # trava 2: tag de producao
 gh api "repos/$R/git/ref/tags/$tag" >/dev/null 2>&1 || manter "a tag $tag nao existe"

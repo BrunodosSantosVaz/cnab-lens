@@ -73,6 +73,7 @@ class ApagarRelease(unittest.TestCase):
         self.assertEqual(len(self.apagou()), 1)
         self.assertIn("repos/dono/repo/git/refs/heads/release/0.2.0", self.apagou()[0])
         self.assertIn("Branch apagada: release/0.2.0", saida)
+        self.assertIn("Conferindo release/0.2.0 antes de apagar:", saida)  # sem "false" colado no texto
 
     def test_nenhuma_chamada_toca_tag_para_escrever(self):
         self.rodar()
