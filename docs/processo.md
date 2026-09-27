@@ -152,10 +152,46 @@ Outras labels: `aprovado` (PR revisado), `sem-executavel` (não altera os execut
 | `develop` | integração | `feature/*`, `bugfix/*` | build de tarefa (CI) |
 | `feature/<n>-<slug>` | uma tarefa (n = nº da issue) | nasce da `develop` (criada pela esteira) | PR para a `develop`; apagada ao encerrar |
 | `bugfix/<n>-<slug>` | bug achado antes de publicar | nasce da `develop` | PR para a `develop`; apagada ao encerrar |
-| `release/x.y.z` | reúne a versão e gera as candidatas | nasce da `develop` (criada pela esteira) | PR para a `main`; **fica** como histórico |
+| `release/x.y.z` | reúne a versão e gera as candidatas | nasce da `develop` (criada pela esteira) | PR para a `main`; **apagada ao encerrar** (a versão fica na tag `vX.Y.Z`) |
 | `hotfix/<n>-<slug>` | bug urgente na versão publicada | nasce da `main` | PR para a `main`; apagada ao encerrar |
 
-No repositório, **em repouso, só existem `main`, `develop` e as `release/x.y.z`** (uma por versão publicada).
+No repositório, **em repouso, só existem `main` e `develop`**. As demais branches são temporárias, como no
+GitFlow: `feature/*`, `bugfix/*`, `hotfix/*` e `release/*` são apagadas quando a versão (ou a sprint sem
+versão) é encerrada. **Quem guarda cada versão é a tag** `vX.Y.Z` (imutável, aponta para o commit publicado)
+e a GitHub Release; as tags nunca são apagadas. Manter uma branch de release só seria necessário com várias
+versões recebendo correção em paralelo (ex.: `release/1.x`), o que não é o caso.
+
+### Como a `release/x.y.z` é apagada (travas de segurança)
+
+No fim do encerramento (*Publicar em produção*, *Pós-publicação* ou o botão *Encerrar sprint*), o
+`encerrar-sprint.sh` chama o `.github/scripts/apagar-release.sh`. Ele só apaga se **todas** as travas passam;
+se uma falha, a branch **fica** e sai um aviso com o motivo (a publicação não é derrubada):
+
+1. nome exato `release/<x.y.z>` (semver): nada de curingas;
+2. a **tag** de produção `vX.Y.Z` existe (a da candidata `-rc.N` não conta);
+3. a **GitHub Release** `vX.Y.Z` existe (a versão foi publicada);
+4. a branch está **contida na tag** (`compare vX.Y.Z...release/x.y.z` com `ahead_by == 0`): nenhum commit fica de fora;
+5. a branch está **contida na `main`** (`ahead_by == 0`): foi mesclada.
+
+**Tags nunca são apagadas nem movidas**: a única escrita é `DELETE git/refs/heads/release/<x.y.z>`. Para limpar
+uma branch antiga à mão, rode primeiro a simulação:
+
+```bash
+VERSAO=v0.2.0 SIMULAR=true  GITHUB_REPOSITORY=BrunodosSantosVaz/cnab-lens bash .github/scripts/apagar-release.sh
+VERSAO=v0.2.0 SIMULAR=false GITHUB_REPOSITORY=BrunodosSantosVaz/cnab-lens bash .github/scripts/apagar-release.sh
+```
+
+### Voltar a uma versão antiga (rollback)
+
+Tudo continua possível **pela tag**, com ou sem a branch de release:
+
+| Quero… | Como |
+|---|---|
+| **Usar** a versão antiga | Baixar o executável da [Release](https://github.com/BrunodosSantosVaz/cnab-lens/releases) da versão. Para um app compilado, esse é o rollback: não há servidor para voltar. |
+| **Ver o código** como estava | `git switch --detach v0.1.0`, ou no GitHub em *Code → Tags → v0.1.0*. `git show v0.1.0:src/version.py` mostra `0.1.0`. |
+| **Recompilar** a versão antiga | Linux: `bash linux/compilar.sh v0.1.0`. Windows: `git switch --detach v0.1.0` e `python scripts\build_exe.py`. |
+| **Corrigir** a versão antiga (hotfix) | `git switch -c hotfix/<n>-<slug> v0.1.0`: a tag é o ponto de partida, e o fluxo de hotfix segue igual. |
+| **Voltar a `main`** para o código antigo | `git revert` dos commits posteriores (ou uma versão nova que desfaz a mudança), por PR, como qualquer alteração. |
 
 Regras: nunca commitar direto na `main` ou na `develop`; PR com `Refs #n` (não `Closes`: as issues
 fecham na publicação); as atualizações do Dependabot (`dependabot/**`, agrupadas em um PR por mês) vão para a `develop` e
@@ -275,8 +311,8 @@ Com **todos** os cartões em *Aprovado*, rode `Publicar em produção` (`versao=
 - **publicar** (`simular=false`, depois da **aprovação do dono** no ambiente `producao`): mescla o PR na `main`,
   **promove os mesmos binários** da candidata (Windows e Linux, com os hashes conferidos) a `vX.Y.Z`
   (Latest, sem recompilar), anuncia no Discussions, **finaliza tudo** — fecha as issues, cartões → *Concluído*/*Corrigido*, épicos com
-  todas as tarefas prontas → *Concluída*, fecha o milestone, apaga as branches das tarefas (**`release/*`
-  fica**) — e devolve a `main` para a `develop`.
+  todas as tarefas prontas → *Concluída*, fecha o milestone, apaga as branches das tarefas e a `release/x.y.z` (com as
+  [travas](#como-a-releasexyz-é-apagada-travas-de-segurança); a versão fica na tag) — e devolve a `main` para a `develop`.
 
 Se algo falhar no meio, rode de novo: a ação é idempotente (se a Release já existe, só refaz a limpeza).
 
@@ -404,13 +440,14 @@ Os scripts da esteira têm testes próprios (`tests/test_*.py`), rodados pelo jo
 | CI (validação do PR) | `CI`: compila, confere os exemplos, roda os testes (`check` é o gate obrigatório) |
 | Homologação | **release candidata versionada** (`vX.Y.Z-rc.N`, pre-release), criada antes de testar |
 | Produção | `Publicar em produção`: promove a candidata aprovada a `vX.Y.Z` (ambiente `producao` com aprovação) |
-| Migrações, backup, rollback | não se aplicam; o "rollback" é o usuário voltar a uma release anterior |
+| Migrações, backup, rollback | não se aplicam; o "rollback" é o usuário voltar a uma release anterior (veja [Voltar a uma versão antiga](#voltar-a-uma-versão-antiga-rollback)) |
 | Pós-deploy | dentro da própria ação: issues, cartões, épicos, milestone, branches e back-merge `main` → `develop` |
 
 ## Versionamento
 
 [SemVer](https://semver.org/lang/pt-BR/) (`MAIOR.MENOR.PATCH`). Antes da 1.0: `MENOR` para
-funcionalidade nova e `PATCH` para correção. Uma versão = uma tag = uma GitHub Release = um milestone.
+funcionalidade nova e `PATCH` para correção. Uma versão = uma tag = uma GitHub Release = um milestone. A tag é
+o registro permanente da versão (a branch `release/x.y.z` é temporária).
 A versão vem só de `src/version.py`. As candidatas usam o sufixo `-rc.N` na tag e no nome do arquivo.
 A procedência de qualquer `.exe` gerado pelo CI se verifica com
 `gh attestation verify <arquivo>.exe --repo BrunodosSantosVaz/cnab-lens`. O executável Linux, por enquanto,
