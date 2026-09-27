@@ -1,7 +1,8 @@
 # Processo de desenvolvimento e entrega
 
 Como o CNABLens é planejado, desenvolvido, testado e publicado. Vale para quem mantém o projeto e
-para quem quer contribuir. O CNABLens é um **aplicativo compilado** (um `.exe`), então não existe
+para quem quer contribuir. O CNABLens é um **aplicativo compilado** (um `.exe` para Windows e um
+executável para Linux, gerados do mesmo código), então não existe
 "deploy em servidor": **publicar uma versão** ocupa o lugar do deploy, e **a versão diz o ambiente**.
 
 A esteira é **automática de ponta a ponta**. Os únicos gestos humanos são: escolher os épicos da
@@ -13,9 +14,9 @@ sprint, revisar e aprovar cada PR, testar a candidata e aprovar (ou reprovar) ca
 1. **Nada começa sem decisão.** Toda mudança nasce em um **épico** discutido até uma conclusão.
 2. **Toda tarefa inclui os seus testes automatizados.** Sem teste, a tarefa não está pronta.
 3. **Mudanças pequenas e frequentes**: um pull request por tarefa.
-4. **O Git guarda o código; a GitHub Release guarda o `.exe`.** Binários não entram no histórico a cada build.
+4. **O Git guarda o código; a GitHub Release guarda os executáveis.** Binários não entram no repositório: cada versão pode ser recompilada a partir da sua tag.
 5. **Toda homologação tem versão.** Sempre existe uma release candidata (`rc`) antes de testar.
-6. **O binário aprovado é o publicado.** A produção não recompila: promove o mesmo arquivo da candidata.
+6. **O binário aprovado é o publicado.** A produção não recompila: promove os mesmos arquivos (Windows e Linux) da candidata.
 7. **O build é automático; o "ok" humano é explícito** (label `aprovado` no PR, cartão *Aprovado*, botão de produção).
 8. **Todo bug vira issue, ganha um teste de regressão e uma versão de correção.**
 9. **O processo é cobrado por ferramenta** (rulesets, CI, portões dos scripts, aprovação de ambiente), não só por combinado.
@@ -37,21 +38,21 @@ Em desenvolvimento                          │  ② Criar branches
       │                                     │  ③ Integrar release      (automático, quando TODOS aprovados)
       │                                     │     release/x.y.z: merge um a um, versão, CHANGELOG
       │                                     │     ④ Release candidata vX.Y.Z-rc.N  (automático)
-      │                                  Homologação ── você testa o .exe da rc
+      │                                  Homologação ── você testa os executáveis da rc
       │                                     ├── Reprovado ─► ② de novo ─► Code ─► … ─► rc.N+1
       │                                  Aprovado
       │  ⑤ Publicar em produção  ◄──────────┘  (todos Aprovados)
-Concluída                                Concluído                      vX.Y.Z (Latest) + releases/vX.Y.Z/
+Concluída                                Concluído                      vX.Y.Z (Latest): .exe + Linux
 ```
 
 Os passos numerados são os únicos **botões** (Actions → *Run workflow*, ou `gh workflow run`). Tudo o
 mais roda sozinho, movendo os cartões conforme o que acontece no GitHub.
 
-> **Atalho para o que não mexe no programa.** Documentação, testes, workflows e scripts não entram no
-> `.exe`. Essas issues levam a label `sem-executavel`: **pulam a homologação e a release** e são concluídas
+> **Atalho para o que não mexe no programa.** Documentação, testes, workflows e scripts não entram nos
+> executáveis. Essas issues levam a label `sem-executavel`: **pulam a homologação e a release** e são concluídas
 > pelo botão *Publicar sem executável*. Veja [Alterações que não afetam o executável](#alterações-que-não-afetam-o-executável).
 
-## Ambientes: a versão diz onde está cada `.exe`
+## Ambientes: a versão diz onde está cada executável
 
 Todos os executáveis ficam no mesmo lugar, a página de
 [Releases](https://github.com/BrunodosSantosVaz/cnab-lens/releases), e o **estado da versão** indica o ambiente:
@@ -67,10 +68,21 @@ homologação do README mostra a mesma versão dos dois lados). Ao integrar uma 
 `rc.1` passa a ser a homologação; quando ela é aprovada e publicada, produção e homologação voltam a ser
 a mesma versão.
 
-O nome do arquivo carrega o estágio (`CNABLens-v0.3.0-rc.2-windows-x64.exe` ou
-`CNABLens-v0.3.0-windows-x64.exe`), mas o **conteúdo do binário é o mesmo** da candidata para a
-produção (o `rc` só existe no nome, e o SHA-256 é idêntico). Em `releases/` do repositório ficam só as
-**cópias das versões de produção**, uma pasta por versão.
+Cada versão (candidata ou produção) traz os dois sistemas:
+
+| Sistema | Arquivo | Hash |
+|---------|---------|------|
+| Windows | `CNABLens-v0.3.0[-rc.2]-windows-x64.exe` | `SHA256SUMS.txt` |
+| Linux | `CNABLens-v0.3.0[-rc.2]-linux-x64` | `SHA256SUMS-linux.txt` |
+
+O nome do arquivo carrega o estágio, mas o **conteúdo do binário é o mesmo** da candidata para a
+produção (o `rc` só existe no nome, e o SHA-256 é idêntico). Os executáveis ficam **só nas Releases**,
+não no repositório.
+
+O `.exe` é compilado por `scripts/build_exe.py` no Windows do CI. O executável Linux é compilado por
+`linux/build_linux.py` com as mesmas opções do PyInstaller, dentro do container
+`quay.io/pypa/manylinux_2_28_x86_64` (glibc 2.28), para rodar em qualquer distro com glibc 2.28 ou mais
+nova. Para compilar localmente: `bash linux/compilar.sh` (veja [`linux/README.md`](../linux/README.md)).
 
 ## Painéis (GitHub Projects)
 
@@ -86,13 +98,13 @@ produção (o `rc` só existe no nome, e o SHA-256 é idêntico). Em `releases/`
 | **Feature** | a branch `feature/<n>-<slug>` existe | *Criar branches* / push da branch |
 | **Code** | há commits na branch | push |
 | **CI/PR** | PR aberto para a `develop` (CI e revisão) | PR aberto |
-| **Homologação** | mesclada na `develop` e/ou dentro da release candidata: **hora de testar o `.exe`** | merge do PR, *Integrar release* (issues `sem-executavel` pulam esta coluna) |
+| **Homologação** | mesclada na `develop` e/ou dentro da release candidata: **hora de testar os executáveis** | merge do PR, *Integrar release* (issues `sem-executavel` pulam esta coluna) |
 | **Aprovado** | você testou a candidata e a tarefa está ok | **você** (arrastar o cartão); `sem-executavel`: **automático** ao mesclar o PR |
 | **Reprovado** | você testou e não está ok | **você** (arrastar o cartão) |
 | **Concluído / Corrigido** | publicado em produção | *Publicar em produção* (ou *Publicar sem executável*) |
 
 Não confunda os dois "aprovados": a **label `aprovado` no PR** significa "revisei o código, pode entrar na
-release" (dispara a integração); o **cartão *Aprovado*** significa "testei o `.exe` da candidata, pode ir
+release" (dispara a integração); o **cartão *Aprovado*** significa "testei os executáveis da candidata, pode ir
 para produção" (libera o portão da produção).
 
 ## Tipos de issue e labels
@@ -108,7 +120,7 @@ para produção" (libera o portão da produção).
 vira **épico** (converter a discussão em issue). A publicação de cada versão é anunciada automaticamente na
 categoria *Anúncios*.
 
-Outras labels: `aprovado` (PR revisado), `sem-executavel` (não altera o `.exe`), `hotfix`, `testing`, `documentation`, `enhancement`, `dependencies`,
+Outras labels: `aprovado` (PR revisado), `sem-executavel` (não altera os executáveis), `hotfix`, `testing`, `documentation`, `enhancement`, `dependencies`,
 `prioridade:*`, `severidade:*`, `good first issue`, `help wanted`.
 
 ## Branches
@@ -207,12 +219,14 @@ PR conflitante volta para *Code* sem a label e ganha um comentário. Também há
 (`Integrar release`, com `simular`).
 
 ### 6. Release candidata e homologação (automático)
-O push em `release/x.y.z` roda *Build release candidata*: testes, compilação, atestado de procedência e a
-**pre-release `vX.Y.Z-rc.N`** com o `.exe` e o `SHA256SUMS.txt`. Em seguida: `release/x.y.z` é levada
+O push em `release/x.y.z` roda *Build release candidata*: testes e compilação do `.exe` no Windows (com
+atestado de procedência), compilação do executável Linux no container `manylinux_2_28` e, só se **os dois**
+compilarem, a **pre-release `vX.Y.Z-rc.N`** com o `.exe` + `SHA256SUMS.txt` e o executável Linux +
+`SHA256SUMS-linux.txt`. Em seguida: `release/x.y.z` é levada
 para a `develop`, os cartões do milestone vão para *Homologação* e é aberto o PR `release/x.y.z` → `main`.
 
 ### 7. Testar e decidir (humano)
-O dono testa **o `.exe` da candidata** e arrasta cada cartão para **Aprovado** ou **Reprovado**.
+O dono testa **os executáveis da candidata** (Windows e Linux) e arrasta cada cartão para **Aprovado** ou **Reprovado**.
 
 - **Reprovado**: rode `Criar branches` (recria a branch e devolve o cartão para *Code*), corrija, abra o PR
   para a `develop` e ponha `aprovado`. A esteira integra na mesma `release/x.y.z`, gera a `rc.N+1` e volta
@@ -226,8 +240,8 @@ Com **todos** os cartões em *Aprovado*, rode `Publicar em produção` (`versao=
   checks falhando/pendentes, se não existir a candidata da versão, se o código mudou depois dela ou se o
   `CHANGELOG.md` não tiver a seção da versão. Com `simular=true` (padrão), para aqui e mostra o plano.
 - **publicar** (`simular=false`, depois da **aprovação do dono** no ambiente `producao`): mescla o PR na `main`,
-  **promove o mesmo binário** da candidata a `vX.Y.Z` (Latest, sem recompilar), guarda `releases/vX.Y.Z/`,
-  anuncia no Discussions, **finaliza tudo** — fecha as issues, cartões → *Concluído*/*Corrigido*, épicos com
+  **promove os mesmos binários** da candidata (Windows e Linux, com os hashes conferidos) a `vX.Y.Z`
+  (Latest, sem recompilar), anuncia no Discussions, **finaliza tudo** — fecha as issues, cartões → *Concluído*/*Corrigido*, épicos com
   todas as tarefas prontas → *Concluída*, fecha o milestone, apaga as branches das tarefas (**`release/*`
   fica**) — e devolve a `main` para a `develop`.
 
@@ -241,13 +255,14 @@ cartão *Corrigido*, back-merge). Esse é o **caminho manual**, que também cobr
 
 ## Alterações que não afetam o executável
 
-Documentação, testes, workflows, scripts e exemplos **não entram no `.exe`**. Passar por homologação e gerar
+Documentação, testes, workflows, scripts e exemplos **não entram nos executáveis**. Passar por homologação e gerar
 uma versão nova só para publicar um texto regravaria o mesmo programa com outro número. Para esse caso existe a
 label **`sem-executavel`**.
 
 **O critério é objetivo:** uma mudança altera o executável se toca `src/` (código do programa) ou
-`requirements-build.txt` (o que é empacotado). Qualquer outra coisa é `sem-executavel`. (`scripts/build_exe.py`
-não conta; o `conferir-release` continua tratando-o como parte do binário nas releases normais.)
+`requirements-build.txt` (o que é empacotado). Qualquer outra coisa é `sem-executavel`. (Os compiladores
+`scripts/build_exe.py` e `linux/build_linux.py` não contam; o `conferir-release` continua tratando os dois
+como parte do binário nas releases normais.)
 
 ### Como a label é aplicada
 
@@ -303,17 +318,17 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 
 | Workflow | Disparo | Faz |
 |----------|---------|-----|
-| `CI` | PR e push | compila, confere exemplos, roda os testes (Windows, compatibilidade e scripts Linux) |
+| `CI` | PR e push | compila, confere exemplos, roda os testes (Windows, compatibilidade e scripts Linux) e compila o executável Linux |
 | `CodeQL` | PR, push, semanal | análise estática |
 | `Regras do PR` | PR | nome de branch, destino, `Refs #n`, aviso de falta de teste |
 | `Kanban automático` | issue, push, PR | move os cartões; conclui tarefa e épico quando a issue fecha |
 | `Iniciar sprint` | **botão** | milestone, épicos → *Em desenvolvimento*, cria tarefas |
 | `Criar branches das tarefas` | **botão** | `feature/*`/`bugfix/*` a partir da `develop` |
 | `Integrar release` | label `aprovado` no PR ou **botão** | `release/x.y.z`, merges, versão e CHANGELOG |
-| `Build release candidata` | push em `release/**`, `hotfix/**` | testes, `.exe`, pre-release `rc.N`; depois homologação |
-| `Publicar em produção` | **botão** | portão, merge na `main`, promove, cópia, anúncio, finaliza, back-merge |
+| `Build release candidata` | push em `release/**`, `hotfix/**` | testes, `.exe` e executável Linux, pre-release `rc.N`; depois homologação |
+| `Publicar em produção` | **botão** | portão, merge na `main`, promove (Windows e Linux), anúncio, finaliza, back-merge |
 | `Publicar sem executável` | **botão** | portão (nada de programa mudou), avança a `main` até a `develop`, fecha as issues `sem-executavel` em *Aprovado* |
-| `Publicar release` | push na `main` (`src/version.py`) | caminho manual (hotfix): promove a candidata, cópia, anúncio |
+| `Publicar release` | push na `main` (`src/version.py`) | caminho manual (hotfix): promove a candidata (Windows e Linux), anúncio |
 | `Pós-publicação da release` | após `Publicar release` | caminho manual: encerra issues e devolve a `main` |
 | `Encerrar sprint` | **botão** | refaz/completa a limpeza pós-produção de uma versão |
 | `Build de tarefa` | merge na `develop` | artefato temporário para testar a tarefa |
@@ -326,11 +341,11 @@ Os botões rodam pela aba **Actions** ou por
 
 | Etapa | O que confere |
 |-------|---------------|
-| PR | `check`: compilação, exemplos, testes; compatibilidade de Python; scripts em Linux; CodeQL; regras do PR |
+| PR | `check`: compilação, exemplos, testes; compatibilidade de Python; scripts em Linux; build do executável Linux; CodeQL; regras do PR |
 | Integração | todos os PRs aprovados e com CI verde; merges sem conflito; versão e CHANGELOG coerentes |
-| Candidata | testes de novo na branch da release, build, atestado e SHA-256 |
-| Homologação | o teste humano do `.exe` (cartão *Aprovado*/*Reprovado*) |
-| Produção | portão: cartões, PR limpo, candidata testada, código idêntico ao da candidata, hash do binário conferido ao promover |
+| Candidata | testes de novo na branch da release, build dos dois executáveis, atestado do `.exe` e SHA-256 dos dois |
+| Homologação | o teste humano dos executáveis (cartão *Aprovado*/*Reprovado*) |
+| Produção | portão: cartões, PR limpo, candidata testada, código e compiladores idênticos aos da candidata, hash dos dois binários conferido ao promover |
 
 Os scripts da esteira têm testes próprios (`tests/test_*.py`), rodados pelo job **scripts (Linux)** do CI.
 
@@ -350,7 +365,8 @@ Os scripts da esteira têm testes próprios (`tests/test_*.py`), rodados pelo jo
 funcionalidade nova e `PATCH` para correção. Uma versão = uma tag = uma GitHub Release = um milestone.
 A versão vem só de `src/version.py`. As candidatas usam o sufixo `-rc.N` na tag e no nome do arquivo.
 A procedência de qualquer `.exe` gerado pelo CI se verifica com
-`gh attestation verify <arquivo>.exe --repo BrunodosSantosVaz/cnab-lens`.
+`gh attestation verify <arquivo>.exe --repo BrunodosSantosVaz/cnab-lens`. O executável Linux, por enquanto,
+tem só o SHA-256 (`SHA256SUMS-linux.txt`).
 
 ## Configuração do repositório (uma vez)
 
@@ -371,7 +387,7 @@ usuário, e os eventos gerados por ele não disparam outros workflows. Crie um *
 (Settings → Developer settings), classic com os escopos `repo` e `project` (o escopo `workflow` só é
 preciso se um push da esteira alterar arquivos de `.github/workflows/`), com validade definida.
 Ele é usado para mover cartões, criar branches, empurrar a `release/x.y.z` (o que dispara a candidata),
-mesclar o PR da release, guardar a cópia em `releases/` e fazer o back-merge: os últimos passos empurram
+mesclar o PR da release e fazer o back-merge: os últimos passos empurram
 em branches protegidas, e o dono é admin e contorna o ruleset.
 
 **Painel Planejamento**: na interface, desligue *Auto-add sub-issues to project* (vem ligado e traria as
