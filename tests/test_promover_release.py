@@ -14,6 +14,7 @@ from _bash import BASH, GIT, posix, USAVEL
 
 SCRIPT = posix(_caminho.RAIZ + "/.github/scripts/promover-release.sh")
 BINARIO = b"MZ conteudo do exe testado em homologacao"
+BINARIO_LINUX = b"ELF conteudo do executavel linux testado em homologacao"
 
 GH_FALSO = r'''#!/usr/bin/env bash
 echo "gh $*" >> "$FIX/chamadas.log"
@@ -25,7 +26,12 @@ case "$1 $2" in
     mkdir -p "$dir"
     cp "$FIX/binario" "$dir/CNABLens-$3-windows-x64.exe"
     (cd "$dir" && sha256sum "CNABLens-$3-windows-x64.exe" > SHA256SUMS.txt)
-    [ ! -f "$FIX/adulterar" ] || echo adulterado >> "$dir/CNABLens-$3-windows-x64.exe" ;;
+    [ ! -f "$FIX/adulterar" ] || echo adulterado >> "$dir/CNABLens-$3-windows-x64.exe"
+    if [ ! -f "$FIX/sem_linux" ]; then
+      cp "$FIX/binario_linux" "$dir/CNABLens-$3-linux-x64"
+      (cd "$dir" && sha256sum "CNABLens-$3-linux-x64" > SHA256SUMS-linux.txt)
+      [ ! -f "$FIX/adulterar_linux" ] || echo adulterado >> "$dir/CNABLens-$3-linux-x64"
+    fi ;;
   "release create")  # guarda os arquivos anexados, como a Release os receberia
     mkdir -p "$FIX/publicado"
     for a in "$@"; do [ ! -f "$a" ] || [ "$a" = notas.md ] || cp "$a" "$FIX/publicado/"; done ;;
@@ -50,6 +56,8 @@ class PromoverRelease(unittest.TestCase):
         os.chmod(gh, os.stat(gh).st_mode | stat.S_IXUSR)
         with open(os.path.join(self.fix, "binario"), "wb") as f:
             f.write(BINARIO)
+        with open(os.path.join(self.fix, "binario_linux"), "wb") as f:
+            f.write(BINARIO_LINUX)
         self.escrever("src/version.py", '__version__ = "0.2.0"\n')
         self.escrever("CHANGELOG.md", "# Changelog\n\n## [0.3.0]\n- futuro\n\n## [0.2.0] - 2026-01-01\n### Adicionado\n- campo novo\n\n## [0.1.0]\n- antigo\n")
         for args in (("init", "-q", "-b", "main"), ("config", "user.email", "t@t"), ("config", "user.name", "t"),
@@ -78,12 +86,17 @@ class PromoverRelease(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertEqual(sorted(saidas), ["nova=true", "tag=v0.2.0"])
         publicado = os.path.join(self.fix, "publicado")
-        self.assertEqual(sorted(os.listdir(publicado)), ["CNABLens-v0.2.0-windows-x64.exe", "SHA256SUMS.txt"])
+        self.assertEqual(sorted(os.listdir(publicado)), ["CNABLens-v0.2.0-linux-x64", "CNABLens-v0.2.0-windows-x64.exe",
+                                                         "SHA256SUMS-linux.txt", "SHA256SUMS.txt"])
         with open(os.path.join(publicado, "CNABLens-v0.2.0-windows-x64.exe"), "rb") as f:
             self.assertEqual(f.read(), BINARIO)  # nada de recompilar: os bytes são os da candidata
         hash_ = hashlib.sha256(BINARIO).hexdigest()
         with open(os.path.join(publicado, "SHA256SUMS.txt"), encoding="utf-8") as f:
             self.assertEqual(f.read().split(), [hash_, "CNABLens-v0.2.0-windows-x64.exe"])
+        with open(os.path.join(publicado, "CNABLens-v0.2.0-linux-x64"), "rb") as f:
+            self.assertEqual(f.read(), BINARIO_LINUX)
+        with open(os.path.join(publicado, "SHA256SUMS-linux.txt"), encoding="utf-8") as f:
+            self.assertEqual(f.read().split(), [hashlib.sha256(BINARIO_LINUX).hexdigest(), "CNABLens-v0.2.0-linux-x64"])
 
     def test_executavel_fica_so_na_release_e_nada_e_gravado_no_repositorio(self):
         r, _ = self.rodar()
@@ -102,6 +115,8 @@ class PromoverRelease(unittest.TestCase):
         self.assertNotIn("antigo", notas)
         self.assertIn("v0.2.0-rc.3", notas)
         self.assertIn(hashlib.sha256(BINARIO).hexdigest(), notas)
+        self.assertIn(hashlib.sha256(BINARIO_LINUX).hexdigest(), notas)
+        self.assertIn("sha256sum -c SHA256SUMS-linux.txt", notas)
 
     def test_cria_a_release_como_latest_no_commit_indicado(self):
         self.rodar(TARGET_SHA="abc123")
@@ -111,6 +126,8 @@ class PromoverRelease(unittest.TestCase):
         self.assertIn("--latest", criar)
         self.assertNotIn("--latest=false", criar)
         self.assertIn("CNABLens-v0.2.0-windows-x64.exe", criar)
+        self.assertIn("CNABLens-v0.2.0-linux-x64", criar)
+        self.assertIn("SHA256SUMS-linux.txt", criar)
 
     def test_ensaio_nao_marca_latest(self):
         self.rodar(TARGET_SHA="abc123", RELEASE_LATEST="false")
@@ -127,6 +144,20 @@ class PromoverRelease(unittest.TestCase):
 
     def test_hash_divergente_da_candidata_aborta(self):
         open(os.path.join(self.fix, "adulterar"), "w").close()
+        r, _ = self.rodar()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertFalse(any(c.startswith("gh release create") for c in self.chamadas()))
+
+
+    def test_candidata_sem_o_executavel_linux_aborta(self):
+        open(os.path.join(self.fix, "sem_linux"), "w").close()
+        r, _ = self.rodar()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("nao tem o arquivo CNABLens-v0.2.0-rc.3-linux-x64", r.stdout + r.stderr)
+        self.assertFalse(any(c.startswith("gh release create") for c in self.chamadas()))
+
+    def test_hash_divergente_do_executavel_linux_aborta(self):
+        open(os.path.join(self.fix, "adulterar_linux"), "w").close()
         r, _ = self.rodar()
         self.assertNotEqual(r.returncode, 0)
         self.assertFalse(any(c.startswith("gh release create") for c in self.chamadas()))
