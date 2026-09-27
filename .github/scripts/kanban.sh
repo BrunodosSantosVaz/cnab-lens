@@ -47,12 +47,24 @@ parse_branch() {
   fi
 }
 
+# Epico novo que declarou no formulario que NAO muda o programa: label sem-executavel (sprint sem
+# versao). So na abertura: depois disso a label e do dono (pode por ou tirar a mao).
+marcar_sem_executavel() {
+  [ "${ACTION:-}" = opened ] || return 0
+  local resposta
+  resposta=$(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --jq '.body // ""' | bash "$AQUI/muda-programa.sh")
+  if [ "$resposta" = nao ]; then
+    gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label sem-executavel >/dev/null
+    echo "Epico #$ISSUE nao muda o programa: label sem-executavel (sprint sem versao)."
+  fi
+}
+
 case "${EVENT:?}" in
   issues)
     if [ "${ACTION:-}" = closed ]; then concluir; exit 0; fi
     for label in $(gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" --jq '.labels[].name'); do
       case "$label" in
-        epic) mover "$PLAN" "$ISSUE" "Brainstorm" "-" ;;
+        epic) mover "$PLAN" "$ISSUE" "Brainstorm" "-"; marcar_sem_executavel ;;
         task) mover "$EXEC" "$ISSUE" "A fazer" "-" ;;
         bug)  mover "$BUGS" "$ISSUE" "Novo" "-" ;;
       esac
