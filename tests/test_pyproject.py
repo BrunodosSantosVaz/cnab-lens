@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """pyproject.toml: válido, versão lida de src/version.py e sem duplicar a versão nem a dependência de build."""
 import os
 import re
@@ -47,6 +46,10 @@ class Pyproject(unittest.TestCase):
         self.assertNotIn("optional-dependencies", self.projeto)
         with open(CAMINHO, encoding="utf-8") as f:
             self.assertNotIn("pyinstaller>=", f.read().lower())
+
+    def test_lint_na_ci(self):
+        with open(os.path.join(_caminho.RAIZ, ".github", "workflows", "ci.yml"), encoding="utf-8") as f:
+            self.assertIn("ruff check .", f.read())
 
     def test_ruff_configurado(self):
         ruff = self.dados["tool"]["ruff"]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Blocos com que os layouts são descritos (CNAB 400 e 240).
 
 Um campo é a tupla `(nome, início, fim, descrição)`, com posições 1-indexadas e inclusivas; uma lista de

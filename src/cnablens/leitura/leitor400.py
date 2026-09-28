@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Regras do CNAB 400: o tipo do registro na posição 1 (0 Header, 1 Detalhe, 9 Trailer) e, em alguns
 layouts, registros opcionais que ficam agrupados sob o Detalhe que os precede."""
 from cnablens.formatacao import format_data

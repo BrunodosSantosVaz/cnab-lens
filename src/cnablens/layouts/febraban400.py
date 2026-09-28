@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB400 (FEBRABAN/CNAB - Cobrança Bancaria) field layout reference data.
 

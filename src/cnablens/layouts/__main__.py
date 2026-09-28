@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Confere todos os layouts: `python -m cnablens.layouts` (a partir de src/, ou com `pip install -e .`).
 
 Cada lista de campos (`*_FIELDS`) de cada módulo de banco precisa cobrir a linha inteira, sem lacunas.

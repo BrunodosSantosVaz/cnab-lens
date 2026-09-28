@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Formatação de valores lidos dos arquivos CNAB: moeda (centavos implícitos), datas (DDMMAA, AAAAMMDD
 ou DDMMAAAA) e o valor como aparece na coluna "Valor" do painel de campos. Não depende da interface."""
 
@@ -20,13 +19,7 @@ def format_valor_monetario(raw):
 
 
 def _valid_ymd(ano, mes, dia):
-    if not (1 <= mes <= 12):
-        return False
-    if not (1 <= dia <= 31):
-        return False
-    if not (1900 <= ano <= 2100):
-        return False
-    return True
+    return 1 <= mes <= 12 and 1 <= dia <= 31 and 1900 <= ano <= 2100
 
 
 def format_data(raw):

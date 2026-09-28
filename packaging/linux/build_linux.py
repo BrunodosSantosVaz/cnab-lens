@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Gera o executável Linux (arquivo único) do CNABLens. Espelho do packaging/windows/build_exe.py.
 
     python packaging/linux/build_linux.py                    # build-local/ (ignorada pelo git)
@@ -56,7 +55,8 @@ def sha256(caminho):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compila o CNABLens para Linux e guarda o executável com o hash SHA-256.")
+    parser = argparse.ArgumentParser(
+        description="Compila o CNABLens para Linux e guarda o executável com o hash SHA-256.")
     parser.add_argument("--saida", help="pasta de destino (padrão: build-local/)")
     parser.add_argument("--rc", type=int, help="número da release candidata (vira -rc.N no nome do arquivo)")
     args = parser.parse_args()

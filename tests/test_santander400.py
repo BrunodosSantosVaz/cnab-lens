@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Layout CNAB 400 do Santander (cnab400_layout_santander): posições e tabelas conferidas com o manual
 H7800 v2.37 (fev/2026). Cada asserção cita a posição do manual."""
 import unittest

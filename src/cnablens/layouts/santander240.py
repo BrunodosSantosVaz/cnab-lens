@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB 240 Santander (banco 033) - Cobrança - referência de campos.
 

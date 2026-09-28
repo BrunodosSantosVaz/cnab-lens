@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Documentação: os links relativos dos documentos principais apontam para arquivos que existem, e
 nenhum documento cita a antiga pasta releases/ do repositório (os executáveis ficam só nas Releases)."""
 import os

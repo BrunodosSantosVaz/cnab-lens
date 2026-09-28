@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Compilador Linux (packaging/linux/build_linux.py e packaging/linux/compilar.sh). Não roda o PyInstaller nem o Docker."""
 import os
 import shutil

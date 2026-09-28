@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Ponto de entrada do CNABLens: `python -m cnablens`, ou este arquivo direto (é o que o PyInstaller
 empacota nos compiladores de packaging/)."""
 import os

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """slug.sh: nome de branch a partir do título (deve casar com ^feature/[0-9]+-[a-z0-9-]+$)."""
-import re
 import subprocess
 import unittest
 

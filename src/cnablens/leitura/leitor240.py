@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Regras do CNAB 240: o tipo do registro na posição 8 e os detalhes (tipo 3) divididos em segmentos,
 identificados pela letra da posição 14 (P, Q, R... na remessa; T, U... no retorno). Um título ocupa vários
 segmentos e é mostrado como um lançamento."""

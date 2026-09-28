@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Arquivos de uma pasta: a lista com metadados e uma espiada rápida no tipo (Remessa/Retorno) de cada um,
 para a lista de arquivos da tela. Não depende da interface."""
 import os
@@ -39,7 +38,7 @@ def peek_tipo_arquivo(path):
     """Espia só a primeira linha do arquivo (rápido, não lê o arquivo
     inteiro) para descobrir se é Remessa ou Retorno, para mostrar na lista."""
     try:
-        with open(path, "r", encoding="latin-1", errors="replace") as fh:
+        with open(path, encoding="latin-1", errors="replace") as fh:
             primeira_linha = fh.readline()
     except OSError:
         return "?"

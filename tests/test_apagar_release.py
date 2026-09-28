@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """apagar-release.sh: a branch release/x.y.z só é apagada com todas as travas satisfeitas (tag, Release,
 branch contida na tag e na main), e nenhuma tag é tocada. `gh` de mentira controlado por arquivos."""
 import os

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Os arquivos de exemplos/ têm que sair idênticos do scripts/gerar_exemplos.py."""
 import os
 import tempfile
@@ -21,9 +20,9 @@ class ExemplosEmDia(unittest.TestCase):
             versionados = sorted(os.listdir(_caminho.EXEMPLOS))
             self.assertEqual(gerados, versionados)
             for nome in gerados:
-                with self.subTest(arquivo=nome):
-                    with open(os.path.join(tmp, nome), "rb") as a, open(_caminho.exemplo(nome), "rb") as b:
-                        self.assertEqual(a.read(), b.read())
+                with self.subTest(arquivo=nome), open(os.path.join(tmp, nome), "rb") as a, \
+                        open(_caminho.exemplo(nome), "rb") as b:
+                    self.assertEqual(a.read(), b.read())
 
 
 if __name__ == "__main__":

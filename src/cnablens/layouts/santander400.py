@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB 400 Santander (banco 033; o Header também aceita 353, código legado) - Cobrança - referência de campos.
 

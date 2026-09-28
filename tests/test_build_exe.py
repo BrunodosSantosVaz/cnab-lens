@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Nome dos arquivos gerados pelo build (candidata x produção). Não roda o PyInstaller."""
 import unittest
 

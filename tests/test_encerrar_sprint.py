@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """encerrar-sprint.sh: no fim do encerramento de uma versão, a release/x.y.z é entregue ao
 apagar-release.sh (que tem as travas). `gh`, `projeto.sh` e `apagar-release.sh` de mentira."""
 import os

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Regras do PR (.github/scripts/pr-regras.sh): nome de branch e destino corretos.
 Só os cenários que não dependem da CLI do GitHub (gh)."""
 import os
@@ -6,7 +5,7 @@ import subprocess
 import unittest
 
 import _caminho
-from _bash import BASH, GIT, USAVEL
+from _bash import BASH, USAVEL
 
 SCRIPT = os.path.join(_caminho.RAIZ, ".github", "scripts", "pr-regras.sh").replace("\\", "/")
 

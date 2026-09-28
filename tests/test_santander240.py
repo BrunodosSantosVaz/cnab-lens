@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Layout CNAB 240 do Santander (cnab240_layout_santander): posições e tabelas conferidas com o manual
 H7815 v8.5 (fev/2026). Cada asserção cita a posição do manual."""
 import unittest

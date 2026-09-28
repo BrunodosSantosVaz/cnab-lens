@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Interface (Tkinter): painel de campos copiável, alinhamento, layouts incompatíveis e grade.
 
 Precisa de uma área de trabalho para criar a janela (escondida). Sem ela, os testes são pulados."""
@@ -23,7 +22,7 @@ class BaseInterface(unittest.TestCase):
         try:
             cls.root = app.App()
         except tk.TclError as exc:  # sem display (ex.: CI Linux sem xvfb)
-            raise unittest.SkipTest(f"sem ambiente gráfico: {exc}")
+            raise unittest.SkipTest(f"sem ambiente gráfico: {exc}") from exc
         cls.root.withdraw()
         cls.root.geometry("1200x700+0+0")
         cls.root.update()
@@ -155,7 +154,7 @@ class Cnab240NaTela(BaseInterface):
             painel = self.root.detail_panel
             titulos = [painel.text.get(f"{n}.0", f"{n}.end") for n in range(1, self.linhas(painel) + 1)
                        if "sep" in painel.text.tag_names(f"{n}.0")]
-            for parte, titulo in zip(esperado, titulos):
+            for parte, titulo in zip(esperado, titulos, strict=False):
                 self.assertIn(parte, titulo)
 
     def test_grade_resume_o_titulo(self):

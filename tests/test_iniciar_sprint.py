@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """iniciar-sprint.sh: sprint x versão. Épico que muda o programa usa o milestone da versão;
 épico `sem-executavel` roda sem versão e sem milestone. `gh` e `projeto.sh` de mentira registram
 as chamadas."""

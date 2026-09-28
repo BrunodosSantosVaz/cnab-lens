@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB400 Sicredi - field layout reference data.
 

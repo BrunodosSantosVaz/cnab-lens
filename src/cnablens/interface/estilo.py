@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Estilo das tabelas: linhas zebradas (branca e cinza-claro alternadas) e texto esmaecido para os campos
 de reserva ("Uso Reservado/Filler")."""
 

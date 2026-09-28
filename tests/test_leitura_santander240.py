@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """CNAB 240 Santander no leitor: segmentos com sub-código (Y-03, Y-53, Y-04 e os dois formatos do S),
 agrupados por título, com arquivos sintéticos e dados fictícios."""
 import os

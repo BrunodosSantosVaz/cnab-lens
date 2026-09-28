@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """CNABLens: lente para arquivos CNAB (remessa e retorno de cobrança, CNAB 400 e 240).
 
 Pacotes:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Lista de arquivos da pasta (com filtro por extensão e o tipo de cada arquivo) e o diálogo que pergunta
 qual extensão listar."""
 import tkinter as tk
@@ -24,7 +23,6 @@ class ExtensionDialog(tk.Toplevel):
         self.confirmado = False
         self.resultado = None
 
-        pad = {"padx": 18, "pady": 4}
         ttk.Label(
             self, text="Esta pasta tem mais de um tipo de arquivo.\nQual formato você quer listar?",
             font=("Segoe UI", 9, "bold"), justify="left",

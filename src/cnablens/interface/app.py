@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 """Janela principal do CNABLens: escolher a pasta, listar os arquivos, ler o arquivo selecionado e
 mostrar o resumo, a grade de lançamentos e o painel de campos, com o seletor de layout.
 
 A janela só organiza a tela: a leitura fica em cnablens.leitura, a formatação em cnablens.formatacao e os
 layouts em cnablens.layouts."""
+import contextlib
 import os
 import traceback
 import tkinter as tk
@@ -94,7 +94,8 @@ class App(tk.Tk):
         self.pasta_count_var = tk.StringVar(value="")
         ttk.Label(top, textvariable=self.pasta_count_var, foreground="#777777").pack(side="left", padx=(0, 6))
 
-        self.btn_refresh = ttk.Button(top, text="⟳ Atualizar", width=11, command=self._atualizar_pasta, state="disabled")
+        self.btn_refresh = ttk.Button(
+            top, text="⟳ Atualizar", width=11, command=self._atualizar_pasta, state="disabled")
         self.btn_refresh.pack(side="left")
 
         ttk.Separator(top, orient="vertical").pack(side="left", fill="y", padx=12)
@@ -167,7 +168,8 @@ class App(tk.Tk):
         btns.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 0))
         self.btn_header = ttk.Button(btns, text="Ver Header do arquivo", command=self.mostrar_header, state="disabled")
         self.btn_header.pack(side="left")
-        self.btn_trailer = ttk.Button(btns, text="Ver Trailer do arquivo", command=self.mostrar_trailer, state="disabled")
+        self.btn_trailer = ttk.Button(
+            btns, text="Ver Trailer do arquivo", command=self.mostrar_trailer, state="disabled")
         self.btn_trailer.pack(side="left", padx=8)
         self.btn_voltar = ttk.Button(
             btns, text="← Voltar aos Lançamentos", command=self.voltar_lancamento, state="disabled",
@@ -208,10 +210,8 @@ class App(tk.Tk):
 
     def destroy(self):
         if getattr(self, "_paned_after", None):  # não deixar um after pendente para a janela já fechada
-            try:
+            with contextlib.suppress(tk.TclError):
                 self.after_cancel(self._paned_after)
-            except tk.TclError:
-                pass
         super().destroy()
 
     def abrir_pasta(self):

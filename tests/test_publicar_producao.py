@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """publicar-producao.sh: o portão da publicação (cartões aprovados, PR limpo, candidata testada) e a
 ordem das etapas. Usa git de verdade (origin + clone) e um `gh` de mentira que responde com JSONs de
 fixture (o filtro --jq roda de verdade no jq) e registra as chamadas."""

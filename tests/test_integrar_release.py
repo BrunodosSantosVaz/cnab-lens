@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """integrar-release.sh: trava do PR `sem-executavel`. A label "aprovado" num PR que não muda o
 programa nunca cria versão, branch de release nem candidata. `gh` de mentira registra as chamadas."""
 import json

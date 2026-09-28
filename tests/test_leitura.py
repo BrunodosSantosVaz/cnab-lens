@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Leitura dos arquivos de exemplo: formato, tipo, banco, layout automático e resumo dos lançamentos."""
 import os
 import tempfile

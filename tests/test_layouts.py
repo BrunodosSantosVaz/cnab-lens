@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Consistência das tabelas de layout e do registro de layouts."""
 import unittest
 
@@ -94,7 +93,7 @@ class RegistroDeLayouts(unittest.TestCase):
         self.assertEqual(layouts.auto_layout_key("033", 240), "santander240")
         self.assertEqual(layouts.auto_layout_key("341", 400), "febraban")
         self.assertEqual(layouts.auto_layout_key("001", 240), "sicoob240")  # padrão para bancos de 240 sem layout próprio
-        for (banco, largura), chave in layouts.AUTO_LAYOUT_BY_BANK.items():
+        for (_banco, largura), chave in layouts.AUTO_LAYOUT_BY_BANK.items():
             self.assertEqual(layouts.LAYOUTS[chave].width, largura)
 
     def test_layouts_400_e_240(self):

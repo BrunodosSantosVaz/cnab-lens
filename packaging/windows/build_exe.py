@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Gera o executável Windows do CNABLens (compilador Windows; o do Linux fica em packaging/linux/).
 
     python packaging/windows/build_exe.py                    # build-local/ (ignorada pelo git)
@@ -12,8 +11,8 @@ Requer Python 3.10+ (com Tkinter) e PyInstaller (`pip install -r requirements-bu
 Resultado, na pasta de saída:
     CNABLens-v<versão>[-rc.N]-windows-x64.exe
     SHA256SUMS.txt          (hash para conferir o download)
-A versão vem do arquivo de versão (src/cnablens/version.py) e é a mesma dentro do .exe em candidata ou final: o sufixo -rc.N só
-aparece no nome do arquivo, para que o binário aprovado em homologação seja exatamente o que vai para
+A versão vem do arquivo de versão (src/cnablens/version.py) e é a mesma dentro do .exe em candidata ou
+final: o sufixo -rc.N só aparece no nome do arquivo, para que o binário aprovado em homologação seja exatamente o que vai para
 produção. Arquivos temporários do PyInstaller ficam fora do repositório.
 """
 import argparse

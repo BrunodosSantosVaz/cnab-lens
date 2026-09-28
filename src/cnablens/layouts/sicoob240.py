@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB 240 Sicoob (Bancoob, banco 756) - Cobrança Bancária - field layout reference data.
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """CNAB 400 Santander no leitor: registros opcionais (8 e 2/4-7 na remessa; 2 no retorno) agrupados sob o
 Detalhe (tipo 1), com arquivos sintéticos e dados fictícios."""
 import os

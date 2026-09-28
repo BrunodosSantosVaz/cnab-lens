@@ -48,7 +48,7 @@ package-dir = { "" = "src" }
 version = { attr = "cnablens.version.__version__" }
 
 # Ruff: estilo e qualidade do código Python (https://docs.astral.sh/ruff/). Rodar com `ruff check .`
-# (instale com `pip install ruff` ou use `uvx ruff check .`). Obrigatório na CI a partir da v0.3.0.
+# (instale com `pip install ruff` ou use `uvx ruff check .`). Roda na CI em todo PR (job "lint (Ruff)").
 [tool.ruff]
 line-length = 120
 target-version = "py310"
@@ -69,3 +69,9 @@ max-complexity = 12
 [tool.ruff.lint.per-file-ignores]
 # módulos de dados de layout: descrições longas transcritas dos manuais dos bancos
 "src/cnablens/layouts/*.py" = ["E501"]
+# gerador dos exemplos fictícios: linhas CNAB de largura fixa montadas campo a campo
+"scripts/gerar_exemplos.py" = ["E501"]
+# modelo VSVersionInfo do PyInstaller (metadados do .exe), que é texto de uma linha só por item
+"packaging/windows/build_exe.py" = ["E501"]
+# testes: mensagens e dados de exemplo longos; o resto das regras vale igual
+"tests/*.py" = ["E501"]

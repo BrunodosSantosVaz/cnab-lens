@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Formatação de valores, datas e campos exibidos no painel."""
 import unittest
 

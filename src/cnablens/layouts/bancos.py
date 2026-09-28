@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Nomes dos bancos pelo código COMPE (3 dígitos), usados no resumo do arquivo quando o Header traz o
 código do banco. Vale para todos os layouts (CNAB 400 e 240)."""
 

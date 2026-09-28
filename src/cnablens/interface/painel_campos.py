@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Painel de campos: Campo / Posição / Valor / Descrição do registro ou lançamento selecionado, com
 seleção e cópia do texto."""
 import tkinter as tk

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Seletor de layout e grade da tela com arquivos Santander (sintéticos, dados fictícios)."""
 import os
 import tempfile
@@ -20,7 +19,7 @@ class TelaSantander(unittest.TestCase):
         try:
             cls.root = app.App()
         except tk.TclError as exc:  # sem display (ex.: CI Linux sem xvfb)
-            raise unittest.SkipTest(f"sem ambiente gráfico: {exc}")
+            raise unittest.SkipTest(f"sem ambiente gráfico: {exc}") from exc
         cls.root.withdraw()
         cls.root.geometry("1200x700+0+0")
         cls.root.update()

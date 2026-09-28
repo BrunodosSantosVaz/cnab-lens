@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """promover-release.sh: promove a release candidata a versão de produção SEM recompilar (mesmo binário,
 mesmo SHA-256), com `gh` de mentira que registra as chamadas."""
 import hashlib
@@ -104,7 +103,7 @@ class PromoverRelease(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.repo, "releases")))
         self.assertFalse(os.path.exists(os.path.join(self.repo, "baixado")))
         status = subprocess.run([GIT, "status", "--porcelain"], cwd=self.repo, capture_output=True, text=True).stdout
-        self.assertEqual([l for l in status.splitlines() if not l.endswith("notas.md")], [])
+        self.assertEqual([linha for linha in status.splitlines() if not linha.endswith("notas.md")], [])
 
     def test_versao_no_pacote(self):
         os.remove(os.path.join(self.repo, "src", "version.py"))

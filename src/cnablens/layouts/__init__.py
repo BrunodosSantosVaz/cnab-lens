@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Registro dos layouts CNAB suportados (CNAB 400 e CNAB 240).
 
 Cada layout (Layout400 ou Layout240, em base.py) só sabe escolher, pelo tipo do arquivo (Remessa ou

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB400 Sicoob (Bancoob, banco 756) - field layout reference data.
 

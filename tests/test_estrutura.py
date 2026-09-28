@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Estrutura do pacote cnablens (épico #58): cada parte com uma responsabilidade.
 
 - a leitura, a formatação e os layouts funcionam sem Tkinter (a interface só apresenta);

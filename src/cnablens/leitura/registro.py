@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Um registro (linha) do arquivo CNAB e um lançamento formado por vários registros.
 
     CnabRecord  uma linha: tipo de registro (Header, Detalhe, Trailer, segmento...) e os campos, depois que

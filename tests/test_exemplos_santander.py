@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Os quatro exemplos do Santander (exemplos/santander*): registros opcionais, QR Code/PIX e totais."""
 import unittest
 

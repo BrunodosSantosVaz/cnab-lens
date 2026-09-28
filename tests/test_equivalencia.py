@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Equivalência da leitura: a refatoração do épico #58 não pode mudar nada do que o programa mostra.
 
 O retrato (tests/dados/equivalencia.json.gz) foi gerado com o código da v0.2.0, ANTES da refatoração:

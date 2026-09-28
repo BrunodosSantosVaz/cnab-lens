@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Leitura dos arquivos CNAB (400 e 240): `CnabFile` lê o arquivo uma vez e aplica o layout escolhido.
 Não depende da interface: pode ser usada em scripts e testes sem Tkinter.
 
