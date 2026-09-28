@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """mesclar.sh: merge uma a uma (--no-ff) de PRs/branches em uma branch de destino, com git de verdade
 em repositórios temporários (um "origin" bare e um clone que faz o papel do runner)."""
 import os

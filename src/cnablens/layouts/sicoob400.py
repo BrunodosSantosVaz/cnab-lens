@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
 CNAB400 Sicoob (Bancoob, banco 756) - field layout reference data.
 
 O Sicoob NÃO usa o layout "genérico" de cobrança CNAB400 (o mesmo que
-Itaú/BB/Bradesco/Caixa etc. compartilham, representado em `cnab400_layout.py`).
+Itaú/BB/Bradesco/Caixa etc. compartilham, representado em `febraban400.py`).
 Ele define seu próprio conjunto de campos/posições para Header, Detalhe e
 Trailer, tanto na Remessa quanto no Retorno - por isso este módulo existe
 separadamente (mesmo caso do Sicredi).
@@ -569,39 +568,3 @@ CARTEIRA_MODALIDADE_CODES = {
 # (ver nota no docstring do módulo).
 
 MOTIVOS_CODES = {}
-
-
-def _validate_contiguous(fields, name):
-    """Sanity check: positions must run 1..400 with no gaps/overlaps."""
-    expected = 1
-    for field_name, start, end, _desc in fields:
-        if start != expected or end < start:
-            raise AssertionError(
-                "%s: gap/overlap near field %r (expected start %d, got %d-%d)"
-                % (name, field_name, expected, start, end)
-            )
-        expected = end + 1
-    if expected != 401:
-        raise AssertionError("%s: fields end at %d, expected 400" % (name, expected - 1))
-
-
-if __name__ == "__main__":
-    _lists = [
-        (HEADER_REMESSA_FIELDS, "HEADER_REMESSA_FIELDS"),
-        (DETAIL_REMESSA_FIELDS, "DETAIL_REMESSA_FIELDS"),
-        (TRAILER_REMESSA_FIELDS, "TRAILER_REMESSA_FIELDS"),
-        (HEADER_RETORNO_FIELDS, "HEADER_RETORNO_FIELDS"),
-        (DETAIL_RETORNO_FIELDS, "DETAIL_RETORNO_FIELDS"),
-        (TRAILER_RETORNO_FIELDS, "TRAILER_RETORNO_FIELDS"),
-        (TRAILER_FIELDS, "TRAILER_FIELDS"),
-    ]
-    for _fields, _name in _lists:
-        _validate_contiguous(_fields, _name)
-        for _f in _fields:
-            assert len(_f) == 4, (_name, _f)
-    print("All Sicoob field layouts are contiguous and cover positions 1-400.")
-    for _fields, _name in _lists:
-        print("%s: %d fields" % (_name, len(_fields)))
-    print("OCORRENCIA_CODES: %d entries" % len(OCORRENCIA_CODES))
-    print("COMANDO_REMESSA_CODES: %d entries" % len(COMANDO_REMESSA_CODES))
-    print("MOTIVOS_CODES: %d entries" % len(MOTIVOS_CODES))

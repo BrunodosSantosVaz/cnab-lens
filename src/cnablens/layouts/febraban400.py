@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB400 (FEBRABAN/CNAB - Cobrança Bancaria) field layout reference data.
 
@@ -61,57 +60,9 @@ Notes on confidence:
     usá-lo). Nomes de dígito verificador (DAC) no FEBRABAN genérico não têm
     uma fórmula única documentada aqui porque o algoritmo varia de banco
     para banco (normalmente módulo 11) - quando o cálculo é conhecido e
-    fixo (caso do Sicredi), ele está descrito em `cnab400_layout_sicredi.py`.
+    fixo (caso do Sicredi), ele está descrito em `sicredi400.py`.
 """
 
-# ---------------------------------------------------------------------------
-# 1. Bank names (COMPE codes)
-# ---------------------------------------------------------------------------
-
-BANK_NAMES = {
-    "001": "Banco do Brasil",
-    "003": "Banco da Amazonia",
-    "004": "Banco do Nordeste do Brasil",
-    "021": "Banestes",
-    "025": "Banco Alfa",
-    "033": "Santander",
-    "037": "Banpara",
-    "041": "Banrisul",
-    "047": "Banese",
-    "070": "BRB - Banco de Brasilia",
-    "077": "Banco Inter",
-    "084": "Uniprime Norte do Parana",
-    "085": "Ailos (Cooperativa Central de Crédito)",
-    "104": "Caixa Economica Federal",
-    "121": "Banco Agibank",
-    "136": "Unicred do Brasil",
-    "151": "Banco Nossa Caixa (incorporado ao Banco do Brasil)",
-    "175": "Banco Rabobank",
-    "212": "Banco Original",
-    "224": "Banco Fibra",
-    "237": "Bradesco",
-    "246": "Banco ABC Brasil",
-    "260": "Nu Pagamentos (Nubank)",
-    "290": "PagSeguro Internet (PagBank)",
-    "318": "Banco BMG",
-    "336": "Banco C6 (C6 Bank)",
-    "341": "Itau Unibanco",
-    "348": "Banco XP",
-    "356": "Banco Real (incorporado ao Santander)",
-    "380": "PicPay",
-    "399": "HSBC Bank Brasil",
-    "403": "Cora Sociedade de Crédito Direto",
-    "422": "Banco Safra",
-    "456": "Banco MUFG Brasil",
-    "604": "Banco Industrial do Brasil",
-    "623": "Banco Pan (ex-Panamericano)",
-    "633": "Banco Rendimento",
-    "655": "Banco Votorantim (BV)",
-    "707": "Banco Daycoval",
-    "745": "Banco Citibank",
-    "748": "Sicredi",
-    "756": "Sicoob (Bancoob)",
-}
 
 # ---------------------------------------------------------------------------
 # 2. Header (Registro tipo 0) - generic layout shared by Remessa and Retorno
@@ -461,31 +412,3 @@ OCORRENCIA_CODES = {
     "92": "Tarifa Mensal de Cancelamento de Negativação Expressa",
     "93": "Tarifa Mensal de Exclusão de Negativação Expressa por Liquidação",
 }
-
-
-def _validate_contiguous(fields, name):
-    """Sanity check: positions must run 1..400 with no gaps/overlaps."""
-    expected = 1
-    for field_name, start, end, _desc in fields:
-        if start != expected or end < start:
-            raise AssertionError(
-                "%s: gap/overlap near field %r (expected start %d, got %d-%d)"
-                % (name, field_name, expected, start, end)
-            )
-        expected = end + 1
-    if expected != 401:
-        raise AssertionError("%s: fields end at %d, expected 400" % (name, expected - 1))
-
-
-if __name__ == "__main__":
-    _validate_contiguous(HEADER_FIELDS, "HEADER_FIELDS")
-    _validate_contiguous(TRAILER_FIELDS, "TRAILER_FIELDS")
-    _validate_contiguous(DETAIL_RETORNO_FIELDS, "DETAIL_RETORNO_FIELDS")
-    _validate_contiguous(DETAIL_REMESSA_FIELDS, "DETAIL_REMESSA_FIELDS")
-    print("All field layouts are contiguous and cover positions 1-400.")
-    print("BANK_NAMES: %d entries" % len(BANK_NAMES))
-    print("HEADER_FIELDS: %d fields" % len(HEADER_FIELDS))
-    print("TRAILER_FIELDS: %d fields" % len(TRAILER_FIELDS))
-    print("DETAIL_RETORNO_FIELDS: %d fields" % len(DETAIL_RETORNO_FIELDS))
-    print("DETAIL_REMESSA_FIELDS: %d fields" % len(DETAIL_REMESSA_FIELDS))
-    print("OCORRENCIA_CODES: %d entries" % len(OCORRENCIA_CODES))

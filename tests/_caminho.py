@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Ajusta o sys.path para os testes importarem os módulos de src/, scripts/ e dos compiladores (packaging/)."""
 import os
 import sys

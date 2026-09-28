@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Resposta do campo "Muda o programa?" do formulário de épico (.github/scripts/muda-programa.sh)."""
 import os
 import subprocess
@@ -51,7 +50,7 @@ class MudaPrograma(unittest.TestCase):
         with open(FORMULARIO, encoding="utf-8") as f:
             texto = f.read()
         self.assertIn("label: Muda o programa?", texto)
-        opcoes = [l.strip()[3:-1] for l in texto.splitlines() if l.strip().startswith('- "')]
+        opcoes = [linha.strip()[3:-1] for linha in texto.splitlines() if linha.strip().startswith('- "')]
         self.assertEqual([self.ler(self.corpo(o)) for o in opcoes], ["sim", "nao"])
 
 

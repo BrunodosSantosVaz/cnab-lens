@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """projeto.sh sprint / sprint-atual / sprint-de: campo "Sprint" (Iteration) dos painéis, com `gh` de
 mentira que devolve um painel com três sprints de 2 semanas e registra as mutações."""
 import json

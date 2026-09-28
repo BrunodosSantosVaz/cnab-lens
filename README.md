@@ -210,16 +210,22 @@ Abra o programa, selecione a pasta `exemplos/` e clique nos arquivos. Para regen
 
 ```
 cnab-lens/
-├── src/                          Código-fonte Python (só biblioteca padrão)
-│   ├── cnab400_reader.py         Interface gráfica (Tkinter) e leitura dos arquivos
-│   ├── cnab400_layouts.py        Registro central dos layouts (alimenta o seletor da tela)
-│   ├── cnab400_layout.py         Layout FEBRABAN genérico, bancos e ocorrências
-│   ├── cnab400_layout_sicredi.py Layout CNAB400 Sicredi
-│   ├── cnab400_layout_sicoob.py  Layout CNAB400 Sicoob
-│   ├── cnab400_layout_santander.py Layout CNAB400 Santander (inclui QR Code/PIX e mensagens)
-│   ├── cnab240_layout_sicoob.py  Layout CNAB240 Sicoob (arquivo, lote, segmentos)
-│   ├── cnab240_layout_santander.py Layout CNAB240 Santander (arquivo, lote, segmentos P a Y)
-│   └── version.py                Versão do programa
+├── src/cnablens/                 Código-fonte (pacote Python; só biblioteca padrão)
+│   ├── __main__.py               Ponto de entrada (python -m cnablens)
+│   ├── version.py                Versão do programa
+│   ├── formatacao.py             Valores em R$, datas e o valor como aparece na tela
+│   ├── leitura/                  Leitura dos arquivos (não depende da interface)
+│   │   ├── __init__.py           CnabFile: lê o arquivo e aplica o layout
+│   │   ├── leitor400.py          Regras do CNAB 400 (Header, Detalhe, registros opcionais)
+│   │   ├── leitor240.py          Regras do CNAB 240 (lotes e segmentos)
+│   │   ├── registro.py           CnabRecord (uma linha) e CnabGroup (um lançamento)
+│   │   └── pasta.py              Arquivos de uma pasta e o tipo (REM/RET) de cada um
+│   ├── layouts/                  Layouts dos bancos
+│   │   ├── __init__.py           Registro dos layouts (seletor e escolha automática pelo banco)
+│   │   ├── base.py               Layout400, Layout240, PorTipo... e a validação das posições
+│   │   ├── bancos.py             Nomes dos bancos
+│   │   └── febraban400.py, sicredi400.py, sicoob400.py, santander400.py, sicoob240.py, santander240.py
+│   └── interface/                Tela (Tkinter): janela, painel de campos, lista de arquivos e estilo
 ├── tests/                        Testes automatizados (unittest)
 ├── packaging/                    Compiladores (as versões oficiais saem do CI)
 │   ├── windows/build_exe.py      Compila o .exe do Windows
@@ -233,7 +239,7 @@ cnab-lens/
 ├── exemplos/                     Arquivos CNAB fictícios de exemplo
 ├── docs/                         Processo de desenvolvimento e imagens do README
 ├── .github/                      Workflows (CI, build, release), modelos de issue/PR, automações
-├── pyproject.toml                Metadados do projeto, versão (lida de src/version.py) e Ruff
+├── pyproject.toml                Metadados do projeto, versão (lida de src/cnablens/version.py) e Ruff
 ├── requirements-build.txt        Dependência de build (PyInstaller)
 ├── AGENTS.md, CLAUDE.md          Instruções para IAs que trabalham no projeto
 ├── CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
@@ -249,18 +255,23 @@ necessária para rodar.
 ```powershell
 git clone https://github.com/BrunodosSantosVaz/cnab-lens.git
 cd cnab-lens
-python src\cnab400_reader.py
+python src\cnablens\__main__.py
 ```
+
+Ou instale o projeto para desenvolver (`pip install -e .`) e rode `python -m cnablens`.
 
 ### Testes
 
 ```powershell
 python -m unittest discover -s tests -v
+uvx ruff check .          # estilo e qualidade (regras em pyproject.toml); ou: pip install ruff && ruff check .
 ```
 
 A suíte cobre as tabelas de layout, a leitura dos arquivos de exemplo (400 e 240), a formatação de valores
 e datas e a interface (cópia de valores, alinhamento, troca de layout). Ela roda a cada pull request no
-GitHub Actions (Windows), e o executável Linux é compilado a cada pull request.
+GitHub Actions (Windows), junto com o Ruff (job lint) e a compilação do executável Linux. Um **teste de
+equivalência** compara a leitura de todos os exemplos, em todos os layouts, com um retrato guardado em
+`tests/dados/`: uma mudança que altere o que o programa mostra aparece ali.
 
 ### Gerando o executável
 
@@ -273,7 +284,7 @@ python packaging\windows\build_exe.py
 
 O script compila com PyInstaller (fora do repositório, sem deixar `build/` ou `.spec`), embute os
 metadados de versão no `.exe` e grava o resultado, com o `SHA256SUMS.txt`, em `build-local/` (ignorada
-pelo Git). A versão vem de `src/version.py`.
+pelo Git). A versão vem de `src/cnablens/version.py`.
 
 **Linux** (precisa de Docker; veja [`packaging/linux/README.md`](packaging/linux/README.md)):
 
@@ -290,29 +301,36 @@ nas Releases, não à mão.
 
 ### Como o programa funciona
 
-1. `CnabFile` lê as linhas cruas, detecta o tamanho (240 ou 400), o tipo (remessa/retorno) e o banco
-   pelo Header, e classifica cada registro (posição 1 no CNAB400; posição 8 e segmento na posição 14
-   no CNAB240).
-2. Um **layout** (`cnab400_layouts.py`) diz quais campos, nomes e posições aplicar a cada tipo de
-   registro. Trocar o layout só reaplica os nomes, sem reler o disco.
-3. No CNAB240, `CnabGroup` reúne os segmentos de um título para a tela tratá-los como um lançamento.
-4. A interface mostra a grade de lançamentos e o painel de campos.
+1. **Leitura** (`cnablens.leitura`): o `CnabFile` lê as linhas uma vez, detecta o tamanho (400 ou 240) e
+   entrega o trabalho ao leitor do formato (`Leitor400` ou `Leitor240`, padrão *Strategy*). O leitor
+   classifica cada registro (posição 1 no CNAB 400; posição 8 e segmento na posição 14 no CNAB 240) e lê
+   pelo Header o tipo (remessa/retorno), o banco, a empresa e a data.
+2. **Layout** (`cnablens.layouts`): diz quais campos, nomes e posições aplicar a cada tipo de registro.
+   Trocar o layout só reaplica os nomes, sem reler o disco. No CNAB 240, os segmentos de um título viram um
+   lançamento (`CnabGroup`); no CNAB 400, o Detalhe leva junto os registros opcionais que o layout descreve.
+3. **Formatação** (`cnablens.formatacao`): valores em R$ e datas, sempre com o valor bruto ao lado.
+4. **Interface** (`cnablens.interface`): mostra a grade de lançamentos e o painel de campos. Ela só
+   apresenta; a leitura e a formatação funcionam sem Tkinter.
 
 ### Adicionando um novo layout (outro banco)
 
-1. Crie `src/cnab400_layout_<nome>.py` (ou `cnab240_layout_<nome>.py`) no estilo de
-   `cnab400_layout_sicredi.py`: listas de tuplas `(nome do campo, início, fim, descrição)` que cobrem
-   as posições 1–400 (ou 1–240) sem lacunas, mais as tabelas de ocorrência. Cada módulo tem uma
-   validação de contiguidade (`python src/cnab400_layout_<nome>.py`).
-2. Registre o layout em `LAYOUTS` e `LAYOUT_ORDER` (e, para escolha automática pelo código do banco,
-   em `AUTO_LAYOUT_BY_BANK`) em `src/cnab400_layouts.py`. O seletor da tela se atualiza sozinho.
-3. Use estes nomes de campo para o resumo da grade funcionar: `Nosso Número` (ou
+1. Crie o módulo de dados em `src/cnablens/layouts/` (ex.: `itau400.py`) no estilo de `sicredi400.py`:
+   listas de tuplas `(nome do campo, início, fim, descrição)` que cobrem as posições 1–400 (ou 1–240) sem
+   lacunas, mais as tabelas de ocorrência. Só dados: nada de lógica.
+2. Registre o layout em `src/cnablens/layouts/__init__.py`: um `Layout400` (ou `Layout240`) em `LAYOUTS`,
+   usando `PorTipo(remessa, retorno)` para as listas, a chave em `LAYOUT_ORDER` e, para a escolha
+   automática pelo código do banco, em `AUTO_LAYOUT_BY_BANK`. O seletor da tela se atualiza sozinho, e a
+   leitura não muda.
+3. Confira as posições com `python -m cnablens.layouts` (a partir de `src/`); os testes fazem o mesmo.
+4. Use estes nomes de campo para o resumo da grade funcionar: `Nosso Número` (ou
    `Nosso Número [Parte]`), `Número do Documento`, `Data de Vencimento`, `Valor Nominal`,
    `Código da Ocorrência` / `Identificação da Ocorrência` / `Código de Movimento`, `Nome do Sacado` ou
    `Nome do Pagador` e `Valor Pago`. Campos com "Data" no nome são formatados como data; os com
    "Valor", "Juros", "Mora", "Desconto", "Abatimento", "IOF", "Tarifa" ou "Despesa" como moeda,
    exceto se o nome também trouxer "Código", "Tipo", "Taxa", "Percentual" etc.
-4. Gere um arquivo fictício para o layout (veja `scripts/gerar_exemplos.py`) e confira na tela.
+5. Gere um arquivo fictício para o layout (veja `scripts/gerar_exemplos.py`), confira na tela e regere o
+   retrato de equivalência (`python tests/test_equivalencia.py --gerar`), porque o layout novo muda o que
+   o programa mostra.
 
 ## Versões e releases
 

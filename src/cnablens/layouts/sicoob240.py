@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB 240 Sicoob (Bancoob, banco 756) - Cobrança Bancária - field layout reference data.
 
@@ -76,30 +75,6 @@ Notas sobre o layout do Sicoob:
     posições, cada um interpretado conforme o Código de Movimento (ver
     MOTIVOS_CODES e descricao_motivo()).
 """
-
-
-# ---------------------------------------------------------------------------
-# Validação de layout
-# ---------------------------------------------------------------------------
-
-
-def _validate_contiguous(fields, name, width=240):
-    """Confere que os campos cobrem 1..width sem lacunas nem sobreposição e que
-    cada tupla tem (nome, inicio, fim, descricao) válidos."""
-    expected = 1
-    for i, f in enumerate(fields):
-        if len(f) != 4:
-            raise ValueError(f"{name}[{i}]: tupla deve ter 4 elementos: {f!r}")
-        nome, ini, fim, desc = f
-        if not (isinstance(nome, str) and nome and isinstance(desc, str) and desc):
-            raise ValueError(f"{name}[{i}]: nome/descrição inválidos: {f!r}")
-        if ini != expected:
-            raise ValueError(f"{name}[{i}] {nome!r}: início {ini} != esperado {expected}")
-        if fim < ini:
-            raise ValueError(f"{name}[{i}] {nome!r}: fim {fim} < início {ini}")
-        expected = fim + 1
-    if expected != width + 1:
-        raise ValueError(f"{name}: termina em {expected - 1}, esperado {width}")
 
 
 # ---------------------------------------------------------------------------
@@ -1169,36 +1144,3 @@ def descricao_motivo(codigo_movimento, motivo):
     if grupo is None:
         return ""
     return MOTIVOS_CODES[grupo].get((motivo or "").strip().upper(), "")
-
-
-
-if __name__ == "__main__":
-    _ALL = [
-        ("HEADER_ARQUIVO_REMESSA_FIELDS", HEADER_ARQUIVO_REMESSA_FIELDS),
-        ("HEADER_ARQUIVO_RETORNO_FIELDS", HEADER_ARQUIVO_RETORNO_FIELDS),
-        ("HEADER_LOTE_REMESSA_FIELDS", HEADER_LOTE_REMESSA_FIELDS),
-        ("HEADER_LOTE_RETORNO_FIELDS", HEADER_LOTE_RETORNO_FIELDS),
-        ("SEGMENTO_P_REMESSA_FIELDS", SEGMENTO_P_REMESSA_FIELDS),
-        ("SEGMENTO_Q_REMESSA_FIELDS", SEGMENTO_Q_REMESSA_FIELDS),
-        ("SEGMENTO_R_REMESSA_FIELDS", SEGMENTO_R_REMESSA_FIELDS),
-        ("SEGMENTO_S_REMESSA_FIELDS", SEGMENTO_S_REMESSA_FIELDS),
-        ("SEGMENTO_S_REMESSA_TIPO_IMPRESSAO_1_2_FIELDS", SEGMENTO_S_REMESSA_TIPO_IMPRESSAO_1_2_FIELDS),
-        ("SEGMENTO_T_RETORNO_FIELDS", SEGMENTO_T_RETORNO_FIELDS),
-        ("SEGMENTO_U_RETORNO_FIELDS", SEGMENTO_U_RETORNO_FIELDS),
-        ("TRAILER_LOTE_REMESSA_FIELDS", TRAILER_LOTE_REMESSA_FIELDS),
-        ("TRAILER_LOTE_RETORNO_FIELDS", TRAILER_LOTE_RETORNO_FIELDS),
-        ("TRAILER_ARQUIVO_FIELDS", TRAILER_ARQUIVO_FIELDS),
-    ]
-    for _name, _fields in _ALL:
-        _validate_contiguous(_fields, _name)
-        print(f"OK  {_name:<48} {len(_fields):>3} campos, posições 1-{_fields[-1][2]}")
-    for _key, _fields in SEGMENTOS.items():
-        assert any(f[0] == "Código de Movimento Remessa" or f[0] == "Código de Movimento Retorno"
-                   for f in _fields), _key
-    for _name, _d in (("MOVIMENTO_REMESSA_CODES", MOVIMENTO_REMESSA_CODES),
-                      ("OCORRENCIA_RETORNO_CODES", OCORRENCIA_RETORNO_CODES),
-                      ("ESPECIE_TITULO_CODES", ESPECIE_TITULO_CODES)):
-        print(f"OK  {_name:<48} {len(_d):>3} códigos")
-    for _g, _d in MOTIVOS_CODES.items():
-        print(f"OK  MOTIVOS_CODES[{_g!r}]".ljust(52) + f" {len(_d):>3} códigos")
-    print("Todas as validações passaram.")

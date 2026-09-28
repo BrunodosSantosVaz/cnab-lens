@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Nome dos arquivos gerados pelo build (candidata x produção). Não roda o PyInstaller."""
 import unittest
 
 import _caminho  # noqa: F401
 import build_exe
-from version import __version__
+from cnablens.version import __version__
 
 
 class NomeDoArquivo(unittest.TestCase):

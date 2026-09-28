@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Issues `sem-executavel` (docs, testes, CI): o critério "toca o executável" (toca-executavel.sh) e a
 ação publicar-sem-executavel.sh (portão, avanço da main e finalização), com git de verdade e um `gh`
 de mentira que registra as chamadas."""
@@ -208,7 +207,7 @@ class PublicarSemExecutavel(unittest.TestCase):
         r, saida = self.rodar()
         self.assertEqual(r.returncode, 1, saida)
         self.assertIn("pendente ou falhando", saida)
-        r_sem_check = self.json("checks.json", {"check_runs": []})
+        self.json("checks.json", {"check_runs": []})
         r, saida = self.rodar()
         self.assertEqual(r.returncode, 1, saida)
 

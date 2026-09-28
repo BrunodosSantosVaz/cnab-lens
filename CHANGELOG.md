@@ -6,6 +6,16 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Não lançado]
 
+## [0.3.0] - 2026-09-28
+
+### Adicionado
+- Criar o pacote src/cnablens com ponto de entrada e mover os módulos sem mudar comportamento (testes, compiladores, gerar_exemplos e pyproject ajustados) (#63)
+- Layouts orientados a objeto sem repetição: Layout400, Layout240, PorTipo e validação única de posições (#64)
+- Separar leitura, formatação e interface em módulos com responsabilidade única (#65)
+- Leitura por formato com Leitor400 e Leitor240 (Strategy) e CnabFile simplificado (#66)
+- Qualidade automatizada: Ruff sem avisos, job de lint na CI e teste de equivalência antes e depois (#67)
+- Documentação da estrutura do código: README, AGENTS.md e como acrescentar um banco (#68)
+
 ## [0.2.0] - 2026-09-24
 
 ### Adicionado
