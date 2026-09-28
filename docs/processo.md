@@ -280,7 +280,7 @@ confere o milestone: **se todos os PRs da sprint estão aprovados e com CI verde
 
 1. cria (ou reaproveita) `release/x.y.z` a partir da `develop`;
 2. mescla as features **uma por uma** (`--no-ff`; PR de fork entra por `refs/pull/N/head`);
-3. atualiza `src/version.py` e a seção `## [x.y.z]` do `CHANGELOG.md`;
+3. atualiza o arquivo de versão (`src/cnablens/version.py`, achado pelo `versao.sh`) e a seção `## [x.y.z]` do `CHANGELOG.md`;
 4. envia a branch.
 
 É **tudo ou nada**: se falta aprovar algum PR, só avisa e espera; se um merge dá conflito, nada é enviado, o
@@ -318,7 +318,7 @@ Se algo falhar no meio, rode de novo: a ação é idempotente (se a Release já 
 
 ### 9. Hotfix
 `hotfix/<n>-<slug>` a partir da `main`, com teste de regressão e versão de correção (`x.y.z+1` em
-`src/version.py` e no `CHANGELOG.md`). O push gera a candidata, e o PR para a `main` mesclado por um
+`src/cnablens/version.py` e no `CHANGELOG.md`). O push gera a candidata, e o PR para a `main` mesclado por um
 humano dispara *Publicar release* (aprovação do ambiente `producao`) e *Pós-publicação* (fecha o bug,
 cartão *Corrigido*, back-merge). Esse é o **caminho manual**, que também cobre uma release mesclada na mão.
 
@@ -411,7 +411,7 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 | `Build release candidata` | push em `release/**`, `hotfix/**` | testes, `.exe` e executável Linux, pre-release `rc.N`; depois homologação |
 | `Publicar em produção` | **botão** | portão, merge na `main`, promove (Windows e Linux), anúncio, finaliza, back-merge |
 | `Publicar sem executável` | **botão** | portão (nada de programa mudou), avança a `main` até a `develop`, fecha as issues `sem-executavel` em *Aprovado* |
-| `Publicar release` | push na `main` (`src/version.py`) | caminho manual (hotfix): promove a candidata (Windows e Linux), anúncio |
+| `Publicar release` | push na `main` (arquivo de versão) | caminho manual (hotfix): promove a candidata (Windows e Linux), anúncio |
 | `Pós-publicação da release` | após `Publicar release` | caminho manual: encerra issues e devolve a `main` |
 | `Encerrar sprint` | **botão** | refaz/completa a limpeza pós-produção de uma versão |
 | `Build de tarefa` | merge na `develop` | artefato temporário para testar a tarefa |
@@ -448,7 +448,7 @@ Os scripts da esteira têm testes próprios (`tests/test_*.py`), rodados pelo jo
 [SemVer](https://semver.org/lang/pt-BR/) (`MAIOR.MENOR.PATCH`). Antes da 1.0: `MENOR` para
 funcionalidade nova e `PATCH` para correção. Uma versão = uma tag = uma GitHub Release = um milestone. A tag é
 o registro permanente da versão (a branch `release/x.y.z` é temporária).
-A versão vem só de `src/version.py`. As candidatas usam o sufixo `-rc.N` na tag e no nome do arquivo.
+A versão vem só de `src/cnablens/version.py` (em tags até a v0.2.0, `src/version.py`; a esteira acha os dois pelo `.github/scripts/versao.sh`). As candidatas usam o sufixo `-rc.N` na tag e no nome do arquivo.
 A procedência de qualquer `.exe` gerado pelo CI se verifica com
 `gh attestation verify <arquivo>.exe --repo BrunodosSantosVaz/cnab-lens`. O executável Linux, por enquanto,
 tem só o SHA-256 (`SHA256SUMS-linux.txt`).

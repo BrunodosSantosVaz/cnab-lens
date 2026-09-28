@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Portão de publicação (.github/scripts/conferir-release.sh): só publica versão com candidata testada
 e código idêntico. Usa um repositório git temporário."""
 import os
@@ -8,7 +7,7 @@ import tempfile
 import unittest
 
 import _caminho
-from _bash import BASH, GIT, USAVEL
+from _bash import BASH, USAVEL
 
 SCRIPT = os.path.join(_caminho.RAIZ, ".github", "scripts", "conferir-release.sh")
 

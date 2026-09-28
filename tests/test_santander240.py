@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Layout CNAB 240 do Santander (cnab240_layout_santander): posições e tabelas conferidas com o manual
 H7815 v8.5 (fev/2026). Cada asserção cita a posição do manual."""
 import unittest
 
 import _caminho  # noqa: F401
-import cnab240_layout_santander as s
+from cnablens.layouts import santander240 as s
 
 
 def campo_em(lista, inicio):

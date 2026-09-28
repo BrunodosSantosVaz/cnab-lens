@@ -47,7 +47,7 @@ do [uv](https://docs.astral.sh/uv/), que já traz o Tk. Nada é instalado no seu
 `docker run`).
 
 ```bash
-bash packaging/linux/compilar.sh                # versão atual (src/version.py), em build-local/
+bash packaging/linux/compilar.sh                # versão atual (src/cnablens/version.py), em build-local/
 bash packaging/linux/compilar.sh v0.2.0         # a partir de uma tag (git fetch --tags antes)
 bash packaging/linux/compilar.sh --saida PASTA  # outra pasta de saída
 bash packaging/linux/compilar.sh --rc 2         # nome de candidata: CNABLens-vX.Y.Z-rc.2-linux-x64
@@ -65,7 +65,7 @@ isso não serve para distribuir.
 
 | Arquivo | Papel |
 |---------|-------|
-| `packaging/linux/build_linux.py` | Chama o PyInstaller com as mesmas opções do `packaging/windows/build_exe.py` do Windows (`--onefile --windowed`, `src/cnab400_reader.py`) e grava o executável com o SHA-256. Pode ser chamado direto, com um Python que tenha Tkinter e o PyInstaller. |
+| `packaging/linux/build_linux.py` | Chama o PyInstaller com as mesmas opções do `packaging/windows/build_exe.py` do Windows (`--onefile --windowed`, ponto de entrada `src/cnablens/__main__.py`) e grava o executável com o SHA-256. Pode ser chamado direto, com um Python que tenha Tkinter e o PyInstaller. |
 | `packaging/linux/compilar.sh` | Prepara o ambiente (container, uv, Python 3.12 com Tk, `requirements-build.txt`) e chama o `build_linux.py`. Com uma tag, compila o código daquela versão num `git worktree` temporário. |
 
 As versões **oficiais** não são compiladas à mão: a esteira do GitHub gera o `.exe` e o executável Linux
@@ -80,7 +80,7 @@ sudo apt install python3-tk        # Debian, Ubuntu, Mint
 sudo dnf install python3-tkinter   # Fedora
 sudo pacman -S tk                  # Arch, Manjaro
 
-python3 src/cnab400_reader.py
+python3 src/cnablens/__main__.py
 ```
 
 ## Segurança

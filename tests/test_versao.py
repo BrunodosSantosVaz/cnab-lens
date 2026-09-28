@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """versao.sh e atualizar_release.arquivo_de_versao: o ponto único que acha a versão, no pacote
 (src/cnablens/version.py, v0.3.0+) ou na estrutura antiga (src/version.py, tags até a v0.2.0)."""
 import os

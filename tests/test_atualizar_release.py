@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """atualizar_release.py: versão em src/version.py e seção da versão no CHANGELOG.md."""
 import importlib.util
 import json

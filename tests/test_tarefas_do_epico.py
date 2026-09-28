@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """Leitura das "Tarefas previstas" do corpo de um épico (.github/scripts/tarefas-do-epico.sh)."""
 import os
 import subprocess
 import unittest
 
 import _caminho
-from _bash import BASH, GIT, USAVEL
+from _bash import BASH, USAVEL
 
 
 SCRIPT = os.path.join(_caminho.RAIZ, ".github", "scripts", "tarefas-do-epico.sh").replace("\\", "/")
