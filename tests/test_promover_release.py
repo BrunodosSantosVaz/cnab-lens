@@ -106,6 +106,14 @@ class PromoverRelease(unittest.TestCase):
         status = subprocess.run([GIT, "status", "--porcelain"], cwd=self.repo, capture_output=True, text=True).stdout
         self.assertEqual([l for l in status.splitlines() if not l.endswith("notas.md")], [])
 
+    def test_versao_no_pacote(self):
+        os.remove(os.path.join(self.repo, "src", "version.py"))
+        os.makedirs(os.path.join(self.repo, "src", "cnablens"))
+        self.escrever("src/cnablens/version.py", '__version__ = "0.2.0"\n')
+        r, saidas = self.rodar()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("tag=v0.2.0", saidas)
+
     def test_notas_sao_a_secao_da_versao_e_citam_a_candidata(self):
         self.rodar(TARGET_SHA="abc123")
         with open(os.path.join(self.repo, "notas.md"), encoding="utf-8") as f:

@@ -132,7 +132,7 @@ if [ "$ja_publicada" = false ]; then
   git fetch --quiet origin "$MAIN" --tags
   git checkout --quiet --detach "origin/$MAIN"
   sha=$(git rev-parse HEAD)
-  versao_main=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/version.py)
+  versao_main=$(bash "$AQUI/versao.sh")
   [ "$versao_main" = "$v" ] || { echo "::error::A $MAIN esta na versao '$versao_main', esperado '$v'. Nada publicado."; exit 1; }
   # o merge nao deve ter alterado o binario testado
   GITHUB_OUTPUT=/dev/null bash "$AQUI/conferir-release.sh"

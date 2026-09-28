@@ -12,7 +12,7 @@
 # Saida (em $GITHUB_OUTPUT, se definido): nova=true|false, tag=vX.Y.Z
 set -euo pipefail
 
-versao=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/version.py)
+versao=$(bash "$(dirname "$0")/versao.sh")
 tag="v${versao}"
 rc="${RC_TAG:?}"
 alvo="${TARGET_SHA:-$(git rev-parse HEAD)}"

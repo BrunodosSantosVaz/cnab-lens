@@ -2,14 +2,14 @@
 # Portao de publicacao: uma versao so chega a producao se existir uma release candidata
 # (vX.Y.Z-rc.N, a homologacao) e se o codigo nao mudou depois dela.
 #
-# Confere: (1) src/version.py legivel; (2) secao "## [X.Y.Z]" no CHANGELOG; (3) existe a tag da
+# Confere: (1) a versao legivel (versao.sh: src/cnablens/version.py ou src/version.py); (2) secao "## [X.Y.Z]" no CHANGELOG; (3) existe a tag da
 # ultima rc dessa versao; (4) src/, os scripts de build (Windows e Linux) e as dependencias de build
 # sao identicos aos da rc (os binarios testados sao os que serao publicados).
 # Usado pelo CI (PR para a main) e pelo workflow "Publicar release". Grava rc_tag= em GITHUB_OUTPUT.
 set -euo pipefail
 
-versao=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/version.py)
-[ -n "$versao" ] || { echo "::error::Nao consegui ler __version__ em src/version.py."; exit 1; }
+AQUI="$(cd "$(dirname "$0")" && pwd)"
+versao=$(bash "$AQUI/versao.sh")
 
 grep -q "^## \[${versao}\]" CHANGELOG.md || {
   echo "::error::CHANGELOG.md sem a secao '## [${versao}]'."; exit 1; }

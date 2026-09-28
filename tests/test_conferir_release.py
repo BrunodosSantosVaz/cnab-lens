@@ -46,6 +46,16 @@ class PortaoDeRelease(unittest.TestCase):
         env = {**os.environ, "GITHUB_OUTPUT": os.path.join(self.pasta, "saida.txt")}
         return subprocess.run([BASH, SCRIPT.replace("\\", "/")], cwd=self.pasta, env=env, capture_output=True, text=True)
 
+    def test_versao_no_pacote(self):
+        os.remove(os.path.join(self.pasta, "src", "version.py"))
+        os.makedirs(os.path.join(self.pasta, "src", "cnablens"))
+        self.escrever("src/cnablens/version.py", '__version__ = "0.2.0"\n')
+        self.git("add", "-A")
+        self.git("commit", "-q", "-m", "pacote")
+        self.git("tag", "v0.2.0-rc.1")
+        r = self.conferir()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
     def test_sem_candidata_reprova(self):
         r = self.conferir()
         self.assertNotEqual(r.returncode, 0)

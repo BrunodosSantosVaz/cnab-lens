@@ -11,7 +11,7 @@
 # Em release/x.y.z (criada pelo "Integrar release") ha um segundo job, "homologar": depois da candidata
 # leva a release para a develop, move os cartoes para Homologacao e abre o PR da release para a main.
 #
-# Precondicao: src/version.py e CHANGELOG.md ja estao na versao da branch (o "Integrar release" os
+# Precondicao: o arquivo de versao (.github/scripts/versao.sh) e o CHANGELOG.md ja estao na versao da branch (o "Integrar release" os
 # atualiza antes do push). Se diferirem, o job apenas avisa e espera o proximo push.
 name: Build release candidata
 
@@ -46,15 +46,15 @@ jobs:
         id: v
         shell: bash
         run: |
-          versao=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/version.py)
+          versao=$(bash .github/scripts/versao.sh)
           echo "versao=$versao" >> "$GITHUB_OUTPUT"
           if [[ "$GITHUB_REF_NAME" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ && "${BASH_REMATCH[1]}" != "$versao" ]]; then
-            echo "::warning::src/version.py esta em $versao, mas a branch e ${BASH_REMATCH[1]}. Atualize a versao e o CHANGELOG nesta branch; a candidata sera gerada no proximo push."
+            echo "::warning::A versao do codigo esta em $versao, mas a branch e ${BASH_REMATCH[1]}. Atualize a versao e o CHANGELOG nesta branch; a candidata sera gerada no proximo push."
             echo "pular=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if git ls-remote --exit-code --tags origin "refs/tags/v${versao}" >/dev/null 2>&1; then
-            echo "::error::A versao v${versao} ja foi publicada. Suba a versao em src/version.py (e o CHANGELOG) antes de gerar uma nova candidata."
+            echo "::error::A versao v${versao} ja foi publicada. Suba a versao no arquivo de versao (e o CHANGELOG) antes de gerar uma nova candidata."
             exit 1
           fi
           n=$(( $(git tag -l "v${versao}-rc.*" | wc -l) + 1 ))

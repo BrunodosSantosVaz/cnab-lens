@@ -95,6 +95,20 @@ class LinhaDeComando(unittest.TestCase):
             with open(caminho, encoding="utf-8") as f:
                 self.assertEqual(f.read(), antes)
 
+    def test_atualiza_a_versao_do_pacote(self):
+        with tempfile.TemporaryDirectory() as raiz:
+            os.makedirs(os.path.join(raiz, "src", "cnablens"))
+            with open(os.path.join(raiz, "src", "cnablens", "version.py"), "w", encoding="utf-8") as f:
+                f.write('__version__ = "0.2.0"\n')
+            with open(os.path.join(raiz, "CHANGELOG.md"), "w", encoding="utf-8") as f:
+                f.write(CHANGELOG)
+            with open(os.path.join(raiz, "itens.json"), "w", encoding="utf-8") as f:
+                json.dump(ITENS, f)
+            ar.main(["--versao", "0.3.0", "--data", "2026-10-01", "--itens", os.path.join(raiz, "itens.json"), "--raiz", raiz])
+            with open(os.path.join(raiz, "src", "cnablens", "version.py"), encoding="utf-8") as f:
+                self.assertIn('"0.3.0"', f.read())
+            self.assertFalse(os.path.exists(os.path.join(raiz, "src", "version.py")))
+
     def test_versao_invalida(self):
         with self.assertRaises(SystemExit):
             ar.main(["--versao", "v0.2", "--data", "x", "--itens", "nao-importa.json"])
