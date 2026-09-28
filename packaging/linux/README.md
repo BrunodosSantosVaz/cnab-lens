@@ -47,10 +47,10 @@ do [uv](https://docs.astral.sh/uv/), que já traz o Tk. Nada é instalado no seu
 `docker run`).
 
 ```bash
-bash packaging/linux/compilar.sh                  # versão atual (src/version.py), em build-local/
-bash packaging/linux/compilar.sh v0.2.0           # a partir de uma tag (git fetch --tags antes)
-bash packaging/linux/compilar.sh --saida PASTA    # outra pasta de saída
-bash packaging/linux/compilar.sh --rc 2           # nome de candidata: CNABLens-vX.Y.Z-rc.2-linux-x64
+bash packaging/linux/compilar.sh                # versão atual (src/version.py), em build-local/
+bash packaging/linux/compilar.sh v0.2.0         # a partir de uma tag (git fetch --tags antes)
+bash packaging/linux/compilar.sh --saida PASTA  # outra pasta de saída
+bash packaging/linux/compilar.sh --rc 2         # nome de candidata: CNABLens-vX.Y.Z-rc.2-linux-x64
 bash packaging/linux/compilar.sh --help
 ```
 
