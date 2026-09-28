@@ -15,7 +15,7 @@ padrão do Python.
 Consulte **sempre** o `pyproject.toml` antes de assumir qualquer coisa sobre o projeto:
 
 - **Python mínimo** (`requires-python`): não use recursos de versões mais novas que ele.
-- **Versão**: o `pyproject.toml` a lê do `src/version.py`. Nunca escreva a versão em outro lugar, e
+- **Versão**: o `pyproject.toml` a lê do `src/cnablens/version.py`. Nunca escreva a versão em outro lugar, e
   nunca a altere à mão: é a esteira que sobe a versão ao integrar uma release.
 - **Estilo e qualidade**: a configuração do Ruff (`[tool.ruff]`). Rode `uvx ruff check .` no que você mexer.
 - **Dependências**: o programa não tem dependências de execução (`dependencies = []`). A de build (o
@@ -26,7 +26,7 @@ Consulte **sempre** o `pyproject.toml` antes de assumir qualquer coisa sobre o p
 
 | Para… | Rode |
 |---|---|
-| Rodar o programa | `python src/cnab400_reader.py` |
+| Rodar o programa | `python src/cnablens/__main__.py` (ou `python -m cnablens` com `pip install -e .`) |
 | Testes (obrigatório antes de todo commit) | `python -m unittest discover -s tests` |
 | Lint | `uvx ruff check .` |
 | Regenerar os exemplos fictícios | `python scripts/gerar_exemplos.py` (o CI confere que `exemplos/` está em dia) |

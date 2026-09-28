@@ -24,12 +24,12 @@ LAYOUTS abaixo.
 
 from collections import namedtuple
 
-import cnab400_layout as febraban
-import cnab400_layout_santander as santander400
-import cnab400_layout_sicredi as sicredi
-import cnab400_layout_sicoob as sicoob400
-import cnab240_layout_santander as santander240
-import cnab240_layout_sicoob as sicoob240
+from cnablens.layouts import febraban400 as febraban
+from cnablens.layouts import santander240
+from cnablens.layouts import santander400
+from cnablens.layouts import sicoob240
+from cnablens.layouts import sicoob400
+from cnablens.layouts import sicredi400 as sicredi
 
 CnabLayout = namedtuple(
     "CnabLayout",

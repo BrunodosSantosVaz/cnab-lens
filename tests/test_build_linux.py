@@ -9,7 +9,7 @@ import unittest
 
 import _caminho  # noqa: F401
 from _bash import BASH, USAVEL, posix
-from version import __version__
+from cnablens.version import __version__
 
 LINUX = os.path.join(_caminho.PACKAGING, "linux")
 if LINUX not in sys.path:

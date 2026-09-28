@@ -13,12 +13,12 @@ import sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(RAIZ, "src"))
 
-import cnab400_layout as febraban          # noqa: E402
-import cnab400_layout_sicredi as sicredi   # noqa: E402
-import cnab400_layout_sicoob as sicoob400  # noqa: E402
-import cnab400_layout_santander as santander400  # noqa: E402
-import cnab240_layout_santander as santander240  # noqa: E402
-import cnab240_layout_sicoob as sicoob240  # noqa: E402
+from cnablens.layouts import febraban400 as febraban     # noqa: E402
+from cnablens.layouts import santander240             # noqa: E402
+from cnablens.layouts import santander400             # noqa: E402
+from cnablens.layouts import sicoob240                # noqa: E402
+from cnablens.layouts import sicoob400                # noqa: E402
+from cnablens.layouts import sicredi400 as sicredi    # noqa: E402
 
 SAIDA = os.path.join(RAIZ, "exemplos")
 EMPRESA = "EMPRESA EXEMPLO LTDA"

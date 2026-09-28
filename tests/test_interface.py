@@ -7,7 +7,7 @@ import unittest
 from unittest import mock
 
 import _caminho
-import cnab400_reader as app
+from cnablens import app
 
 
 class Evento:
@@ -56,7 +56,7 @@ class BaseInterface(unittest.TestCase):
 
 class Titulo(BaseInterface):
     def test_titulo_da_janela_mostra_a_versao(self):
-        from version import __version__
+        from cnablens.version import __version__
         self.assertIn("CNABLens", self.root.title())
         self.assertIn(__version__, self.root.title())
 

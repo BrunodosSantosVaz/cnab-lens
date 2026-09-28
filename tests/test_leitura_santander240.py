@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 import _caminho  # noqa: F401
-import cnab400_reader as reader
+from cnablens import app as reader
 
 
 def valor_em(registro, inicio):

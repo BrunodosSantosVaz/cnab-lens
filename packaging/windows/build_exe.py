@@ -61,6 +61,13 @@ def arquivo_versao_windows(pasta):
     return caminho
 
 
+def ponto_de_entrada():
+    """Script que o PyInstaller empacota: o do pacote cnablens (v0.3.0+) ou, ao compilar uma tag antiga,
+    o módulo único da estrutura anterior."""
+    pacote = os.path.join(SRC, "cnablens", "__main__.py")
+    return pacote if os.path.isfile(pacote) else os.path.join(SRC, "cnab400_reader.py")
+
+
 def nome_do_arquivo(rc=None):
     """Nome do .exe: CNABLens-v0.2.0-windows-x64.exe (produção) ou CNABLens-v0.2.0-rc.1-windows-x64.exe."""
     sufixo = f"-rc.{int(rc)}" if rc else ""
@@ -87,7 +94,7 @@ def main():
             sys.executable, "-m", "PyInstaller", "--onefile", "--windowed", "--clean", "--noconfirm",
             "--name", NOME, "--version-file", arquivo_versao_windows(tmp),
             "--distpath", os.path.join(tmp, "dist"), "--workpath", os.path.join(tmp, "work"), "--specpath", tmp,
-            "--paths", SRC, os.path.join(SRC, "cnab400_reader.py"),
+            "--paths", SRC, ponto_de_entrada(),
         ]
         print(" ".join(cmd))
         subprocess.run(cmd, check=True, cwd=SRC)

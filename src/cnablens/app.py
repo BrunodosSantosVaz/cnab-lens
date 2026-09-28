@@ -16,9 +16,9 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, filedialog, messagebox
 
-import cnab400_layout as layout
-import cnab400_layouts as layouts
-from version import __version__
+from cnablens import layouts
+from cnablens.layouts import febraban400 as layout
+from cnablens.version import __version__
 
 TITULO_APP = f"CNABLens v{__version__}"
 

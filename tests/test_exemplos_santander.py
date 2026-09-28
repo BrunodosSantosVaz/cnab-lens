@@ -3,7 +3,7 @@
 import unittest
 
 import _caminho
-import cnab400_reader as app
+from cnablens import app
 
 
 def valor_em(registro, inicio):

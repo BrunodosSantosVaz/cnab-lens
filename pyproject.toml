@@ -2,7 +2,7 @@
 # projeto e para as IAs (veja AGENTS.md).
 #
 # O que NÃO fica aqui, de propósito, para não duplicar:
-#   - a versão: só em src/version.py (lida abaixo, em [tool.setuptools.dynamic]);
+#   - a versão: só em src/cnablens/version.py (lida abaixo, em [tool.setuptools.dynamic]);
 #   - a dependência de build (PyInstaller): só em requirements-build.txt. É o que o Dependabot atualiza e o
 #     que o portão da produção trata como "o que é empacotado" (docs/processo.md).
 # O programa só usa a biblioteca padrão do Python: não há dependências de execução.
@@ -45,7 +45,7 @@ classifiers = [
 package-dir = { "" = "src" }
 
 [tool.setuptools.dynamic]
-version = { attr = "version.__version__" }
+version = { attr = "cnablens.version.__version__" }
 
 # Ruff: estilo e qualidade do código Python (https://docs.astral.sh/ruff/). Rodar com `ruff check .`
 # (instale com `pip install ruff` ou use `uvx ruff check .`). Obrigatório na CI a partir da v0.3.0.
@@ -68,5 +68,4 @@ max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
 # módulos de dados de layout: descrições longas transcritas dos manuais dos bancos
-"src/cnab400_layout*.py" = ["E501"]
-"src/cnab240_layout*.py" = ["E501"]
+"src/cnablens/layouts/*.py" = ["E501"]

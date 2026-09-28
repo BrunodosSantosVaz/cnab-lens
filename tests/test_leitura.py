@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 import _caminho
-import cnab400_reader as app
+from cnablens import app
 
 # arquivo -> (layout automático, tipo, largura, banco)
 ESPERADO = {

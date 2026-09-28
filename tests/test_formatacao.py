@@ -3,7 +3,7 @@
 import unittest
 
 import _caminho  # noqa: F401
-import cnab400_reader as app
+from cnablens import app
 
 
 class Datas(unittest.TestCase):

@@ -3,13 +3,13 @@
 import unittest
 
 import _caminho  # noqa: F401
-import cnab240_layout_santander as santander240
-import cnab240_layout_sicoob as sicoob240
-import cnab400_layout as febraban
-import cnab400_layout_santander as santander400
-import cnab400_layout_sicoob as sicoob400
-import cnab400_layout_sicredi as sicredi
-import cnab400_layouts as layouts
+from cnablens.layouts import santander240
+from cnablens.layouts import sicoob240
+from cnablens.layouts import febraban400 as febraban
+from cnablens.layouts import santander400
+from cnablens.layouts import sicoob400
+from cnablens.layouts import sicredi400 as sicredi
+from cnablens import layouts
 
 MODULOS = [(febraban, 400), (sicredi, 400), (sicoob400, 400), (santander400, 400), (sicoob240, 240), (santander240, 240)]
 
