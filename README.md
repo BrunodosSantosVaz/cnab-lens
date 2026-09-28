@@ -233,7 +233,9 @@ cnab-lens/
 ├── exemplos/                     Arquivos CNAB fictícios de exemplo
 ├── docs/                         Processo de desenvolvimento e imagens do README
 ├── .github/                      Workflows (CI, build, release), modelos de issue/PR, automações
+├── pyproject.toml                Metadados do projeto, versão (lida de src/version.py) e Ruff
 ├── requirements-build.txt        Dependência de build (PyInstaller)
+├── AGENTS.md, CLAUDE.md          Instruções para IAs que trabalham no projeto
 ├── CHANGELOG.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
 └── LICENSE
 ```

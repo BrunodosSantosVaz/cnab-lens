@@ -24,6 +24,9 @@ por fictícios ou informe apenas as posições e os valores envolvidos. Os arqui
 
 ## Ambiente de desenvolvimento
 
+Os metadados do projeto, a versão mínima do Python e a configuração do Ruff ficam no `pyproject.toml`. Se você usa
+uma IA para programar, ela segue o [`AGENTS.md`](AGENTS.md) (o Claude Code o lê pelo `CLAUDE.md`).
+
 Requer **Python 3.10 ou superior com Tkinter** (o instalador oficial do Python para Windows já
 inclui; no Linux, instale o pacote `tk`/`python3-tk` da distro). O programa não usa bibliotecas externas.
 
