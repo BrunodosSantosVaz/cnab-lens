@@ -221,14 +221,15 @@ cnab-lens/
 │   ├── cnab240_layout_santander.py Layout CNAB240 Santander (arquivo, lote, segmentos P a Y)
 │   └── version.py                Versão do programa
 ├── tests/                        Testes automatizados (unittest)
+├── packaging/                    Compiladores (as versões oficiais saem do CI)
+│   ├── windows/build_exe.py      Compila o .exe do Windows
+│   └── linux/
+│       ├── build_linux.py        Compila o executável Linux (mesmas opções do build_exe.py)
+│       ├── compilar.sh           Compila no container manylinux_2_28, para rodar em qualquer distro
+│       └── README.md             Baixar, rodar e compilar no Linux
 ├── scripts/
-│   ├── build_exe.py              Compila o .exe do Windows (build local; as versões oficiais saem do CI)
 │   ├── gerar_exemplos.py         Gera os arquivos fictícios de exemplos/
 │   └── processo/                 Configuração do GitHub (labels, painéis, automações)
-├── linux/
-│   ├── build_linux.py            Compila o executável Linux (mesmas opções do build_exe.py)
-│   ├── compilar.sh               Compila no container manylinux_2_28, para rodar em qualquer distro
-│   └── README.md                 Baixar, rodar e compilar no Linux
 ├── exemplos/                     Arquivos CNAB fictícios de exemplo
 ├── docs/                         Processo de desenvolvimento e imagens do README
 ├── .github/                      Workflows (CI, build, release), modelos de issue/PR, automações
