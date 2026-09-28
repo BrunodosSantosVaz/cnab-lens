@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Gera o executável Windows e guarda uma cópia versionada em releases/.
+"""Gera o executável Windows do CNABLens (compilador Windows; o do Linux fica em packaging/linux/).
 
-    python scripts/build_exe.py                    # build-local/ (ignorada pelo git)
-    python scripts/build_exe.py --saida PASTA      # outra pasta
-    python scripts/build_exe.py --rc 2 --saida rc  # release candidata: CNABLens-v<versão>-rc.2-...
+    python packaging/windows/build_exe.py                    # build-local/ (ignorada pelo git)
+    python packaging/windows/build_exe.py --saida PASTA      # outra pasta
+    python packaging/windows/build_exe.py --rc 2 --saida rc  # release candidata: CNABLens-v<versão>-rc.2-...
 
-As cópias de releases/ e os arquivos das Releases do GitHub são gerados pelo CI (workflows
-"Build release candidata" e "Publicar release"), não à mão.
+Os executáveis oficiais (candidatas e produção) são gerados pelo CI (workflow "Build release
+candidata") e ficam só nas Releases do GitHub, não à mão.
 
 Requer Python 3.10+ (com Tkinter) e PyInstaller (`pip install -r requirements-build.txt`).
 Resultado, na pasta de saída:
@@ -24,7 +24,7 @@ import subprocess
 import sys
 import tempfile
 
-RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # packaging/windows/ -> raiz
 SRC = os.path.join(RAIZ, "src")
 sys.path.insert(0, SRC)
 from version import __version__  # noqa: E402

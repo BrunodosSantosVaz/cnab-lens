@@ -7,7 +7,7 @@ import unittest
 
 import _caminho
 
-DOCUMENTOS = ["README.md", "CONTRIBUTING.md", "SECURITY.md", "docs/processo.md", "linux/README.md"]
+DOCUMENTOS = ["README.md", "CONTRIBUTING.md", "SECURITY.md", "docs/processo.md", "packaging/linux/README.md"]
 LINK = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
 
 
@@ -51,7 +51,7 @@ class Documentacao(unittest.TestCase):
 
     def test_linux_documentado_no_readme(self):
         readme = self.ler("README.md")
-        for trecho in ("linux/README.md", "CNABLens-vX.Y.Z-linux-x64", "SHA256SUMS-linux.txt", "bash linux/compilar.sh"):
+        for trecho in ("packaging/linux/README.md", "CNABLens-vX.Y.Z-linux-x64", "SHA256SUMS-linux.txt", "bash packaging/linux/compilar.sh"):
             with self.subTest(trecho=trecho):
                 self.assertIn(trecho, readme)
 

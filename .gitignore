@@ -18,7 +18,7 @@ arquivos/
 Thumbs.db
 .DS_Store
 
-# Saída padrão do scripts/build_exe.py (builds locais)
+# Saída padrão dos compiladores de packaging/ (builds locais)
 build-local/
 rc/
 tarefa/

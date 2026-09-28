@@ -27,7 +27,7 @@ jobs:
       - name: Testes
         run: python -m unittest discover -s tests -v
       - name: Compilar
-        run: python scripts/build_exe.py --saida tarefa
+        run: python packaging/windows/build_exe.py --saida tarefa
       - uses: actions/upload-artifact@v4
         with:
           name: CNABLens-tarefa-${{ github.sha }}

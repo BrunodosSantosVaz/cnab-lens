@@ -52,7 +52,7 @@ class TocaExecutavel(unittest.TestCase):
 
     def test_docs_testes_e_automacao_nao_tocam(self):
         self.assertEqual(self.rodar(["README.md", "docs/processo.md", "tests/test_x.py", ".github/workflows/ci.yml",
-                                     ".github/scripts/kanban.sh", "scripts/build_exe.py", "exemplos/a.rem"]), 1)
+                                     ".github/scripts/kanban.sh", "packaging/windows/build_exe.py", "exemplos/a.rem"]), 1)
 
     def test_codigo_do_programa_toca(self):
         self.assertEqual(self.rodar(["README.md", "src/cnab400_reader.py"]), 0)

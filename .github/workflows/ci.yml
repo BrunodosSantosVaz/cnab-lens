@@ -77,7 +77,7 @@ jobs:
           /tmp/venv/bin/python -c "import tkinter"
           VIRTUAL_ENV=/tmp/venv /opt/python/cp312-cp312/bin/uv pip install -q -r requirements-build.txt
       - name: Compilar
-        run: /tmp/venv/bin/python linux/build_linux.py --saida build-linux
+        run: /tmp/venv/bin/python packaging/linux/build_linux.py --saida build-linux
       - name: Conferir o executavel
         run: |
           cd build-linux && sha256sum -c SHA256SUMS.txt

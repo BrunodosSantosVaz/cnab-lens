@@ -98,7 +98,7 @@ versão de **produção**, e cada versão traz os dois sistemas:
    ```
 
 Não precisa instalar Python nem Tk: vai tudo dentro do executável. Detalhes, distros suportadas e como
-compilar no Linux estão em [`linux/README.md`](linux/README.md).
+compilar no Linux estão em [`packaging/linux/README.md`](packaging/linux/README.md).
 
 *Verificação avançada:* os `.exe` compilados pelo CI têm **atestado de procedência** (prova de que
 foram gerados por este repositório, naquele commit): `gh attestation verify CNABLens-vX.Y.Z-windows-x64.exe --repo BrunodosSantosVaz/cnab-lens`.
@@ -265,18 +265,18 @@ GitHub Actions (Windows), e o executável Linux é compilado a cada pull request
 
 ```powershell
 pip install -r requirements-build.txt
-python scripts\build_exe.py
+python packaging\windows\build_exe.py
 ```
 
 O script compila com PyInstaller (fora do repositório, sem deixar `build/` ou `.spec`), embute os
 metadados de versão no `.exe` e grava o resultado, com o `SHA256SUMS.txt`, em `build-local/` (ignorada
 pelo Git). A versão vem de `src/version.py`.
 
-**Linux** (precisa de Docker; veja [`linux/README.md`](linux/README.md)):
+**Linux** (precisa de Docker; veja [`packaging/linux/README.md`](packaging/linux/README.md)):
 
 ```bash
-bash linux/compilar.sh           # versão atual
-bash linux/compilar.sh v0.2.0    # a partir de uma tag
+bash packaging/linux/compilar.sh           # versão atual
+bash packaging/linux/compilar.sh v0.2.0    # a partir de uma tag
 ```
 
 Compila dentro de um container antigo (glibc 2.28), para o executável rodar em qualquer distro, e grava

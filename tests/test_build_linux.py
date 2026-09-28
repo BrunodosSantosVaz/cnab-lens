@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Compilador Linux (linux/build_linux.py e linux/compilar.sh). Não roda o PyInstaller nem o Docker."""
+"""Compilador Linux (packaging/linux/build_linux.py e packaging/linux/compilar.sh). Não roda o PyInstaller nem o Docker."""
 import os
 import shutil
 import subprocess
@@ -11,7 +11,7 @@ import _caminho  # noqa: F401
 from _bash import BASH, USAVEL, posix
 from version import __version__
 
-LINUX = os.path.join(_caminho.RAIZ, "linux")
+LINUX = os.path.join(_caminho.PACKAGING, "linux")
 if LINUX not in sys.path:
     sys.path.insert(0, LINUX)
 import build_exe  # noqa: E402
@@ -45,7 +45,7 @@ class Compilar(unittest.TestCase):
     def test_ajuda(self):
         r = self.rodar("--help")
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn("linux/compilar.sh v0.2.0", r.stdout)
+        self.assertIn("packaging/linux/compilar.sh v0.2.0", r.stdout)
 
     def test_argumento_desconhecido_para(self):
         r = self.rodar("--nao-existe")
@@ -64,6 +64,26 @@ class Compilar(unittest.TestCase):
         self.assertIn("A tag v99.99.99 não existe", r.stderr)
         self.assertEqual(os.listdir(saida), [])
 
+
+
+class CaminhosDosCompiladores(unittest.TestCase):
+    """Os compiladores ficam em packaging/<sistema>/ (épico #56): nada versionado aponta para o lugar antigo."""
+    ANTIGOS = ("scripts/build_exe.py", "scripts\\build_exe.py", "linux/build_linux.py", "linux/compilar.sh", "linux/README.md")
+
+    def test_nenhum_arquivo_cita_os_caminhos_antigos(self):
+        arquivos = subprocess.run(["git", "ls-files"], cwd=_caminho.RAIZ, capture_output=True, text=True).stdout.split()
+        for nome in arquivos:
+            if not nome.endswith((".py", ".sh", ".yml", ".md", ".txt", ".toml")) or nome in ("CHANGELOG.md", "tests/test_build_linux.py"):
+                continue
+            with open(os.path.join(_caminho.RAIZ, nome), encoding="utf-8") as f:
+                texto = f.read().replace("packaging/linux/", "").replace("packaging/windows/", "")
+            for antigo in self.ANTIGOS:
+                with self.subTest(arquivo=nome, caminho=antigo):
+                    self.assertNotIn(antigo, texto)
+
+    def test_compiladores_no_lugar_novo(self):
+        for caminho in ("packaging/windows/build_exe.py", "packaging/linux/build_linux.py", "packaging/linux/compilar.sh"):
+            self.assertTrue(os.path.isfile(os.path.join(_caminho.RAIZ, caminho)), caminho)
 
 if __name__ == "__main__":
     unittest.main()

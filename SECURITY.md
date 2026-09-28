@@ -35,5 +35,5 @@ telemetria. Interessam relatos como:
   compile a partir do código-fonte (veja o [README](README.md)).
 - **Linux:** confira o executável com o `SHA256SUMS-linux.txt` da mesma release
   (`sha256sum -c SHA256SUMS-linux.txt`). Ele é gerado pelo CI a partir do mesmo código, mas **ainda não
-  tem atestado de procedência** nem assinatura: se preferir, compile com `bash linux/compilar.sh`
-  (veja [`linux/README.md`](linux/README.md)).
+  tem atestado de procedência** nem assinatura: se preferir, compile com `bash packaging/linux/compilar.sh`
+  (veja [`packaging/linux/README.md`](packaging/linux/README.md)).

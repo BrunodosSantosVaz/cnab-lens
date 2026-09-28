@@ -33,17 +33,17 @@ cd cnab-lens
 python src\cnab400_reader.py                       # rodar
 python -m unittest discover -s tests -v            # testes
 pip install -r requirements-build.txt              # só para gerar o .exe
-python scripts\build_exe.py                        # gera em build-local/ (ignorada pelo Git)
+python packaging\windows\build_exe.py                        # gera em build-local/ (ignorada pelo Git)
 ```
 
 No Linux, o executável é compilado dentro de um container (precisa de Docker), para rodar em qualquer
-distro. Detalhes em [`linux/README.md`](linux/README.md):
+distro. Detalhes em [`packaging/linux/README.md`](packaging/linux/README.md):
 
 ```bash
-bash linux/compilar.sh                             # gera em build-local/ (ignorada pelo Git)
+bash packaging/linux/compilar.sh                             # gera em build-local/ (ignorada pelo Git)
 ```
 
-Mudanças em `scripts/build_exe.py` ou `linux/build_linux.py` devem manter os dois compiladores com as
+Mudanças em `packaging/windows/build_exe.py` ou `packaging/linux/build_linux.py` devem manter os dois compiladores com as
 mesmas opções de empacotamento (o mesmo programa nos dois sistemas).
 
 ## Fluxo de trabalho
