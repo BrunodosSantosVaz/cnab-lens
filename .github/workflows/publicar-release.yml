@@ -13,7 +13,7 @@ name: Publicar release
 on:
   push:
     branches: [main]
-    paths: ['src/version.py']
+    paths: ['src/version.py', 'src/cnablens/version.py']
   # Publicacao manual da versao atual da main (idempotente). Tambem exige a aprovacao.
   workflow_dispatch:
 

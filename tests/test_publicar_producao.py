@@ -63,7 +63,7 @@ class PublicarProducao(unittest.TestCase):
         # scripts sob teste (copiados) + etapas de mentira
         self.scripts = os.path.join(self.tmp, "scripts")
         os.makedirs(self.scripts)
-        for nome in ("publicar-producao.sh", "conferir-release.sh"):
+        for nome in ("publicar-producao.sh", "conferir-release.sh", "versao.sh"):
             shutil.copy(os.path.join(SCRIPTS, nome), self.scripts)
         for nome in ("promover-release.sh", "anunciar-release.sh", "encerrar-sprint.sh", "backmerge.sh"):
             escrever_exec(os.path.join(self.scripts, nome), ETAPA_FALSA)

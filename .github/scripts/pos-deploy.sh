@@ -29,11 +29,11 @@ echo "PR de origem: '${head:-?}' ($title)"
 versao=""
 if   [[ "$head" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then versao="${BASH_REMATCH[1]}"
 elif [[ "$title" =~ ([0-9]+\.[0-9]+\.[0-9]+) ]];          then versao="${BASH_REMATCH[1]}"
-elif [ -f src/version.py ]; then
-  versao=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/version.py)
+elif bash "$(dirname "$0")/versao.sh" --arquivo >/dev/null 2>&1; then
+  versao=$(bash "$(dirname "$0")/versao.sh")
 fi
 tag="v${versao:-?}"
-[ -n "$versao" ] || echo "::warning::Versao nao identificada (branch, titulo ou src/version.py)."
+[ -n "$versao" ] || echo "::warning::Versao nao identificada (branch, titulo ou arquivo de versao)."
 
 if [[ "$head" =~ ^release/ ]] && [ -n "$versao" ]; then
   VERSAO="$versao" SIMULAR="$([ "${DRY_RUN:-}" = 1 ] && echo true || echo false)" bash "$AQUI/encerrar-sprint.sh"

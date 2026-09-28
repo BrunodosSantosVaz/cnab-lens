@@ -12,7 +12,7 @@ Requer Python 3.10+ (com Tkinter) e PyInstaller (`pip install -r requirements-bu
 Resultado, na pasta de saída:
     CNABLens-v<versão>[-rc.N]-windows-x64.exe
     SHA256SUMS.txt          (hash para conferir o download)
-A versão vem de src/version.py e é a mesma dentro do .exe em candidata ou final: o sufixo -rc.N só
+A versão vem do arquivo de versão (src/cnablens/version.py) e é a mesma dentro do .exe em candidata ou final: o sufixo -rc.N só
 aparece no nome do arquivo, para que o binário aprovado em homologação seja exatamente o que vai para
 produção. Arquivos temporários do PyInstaller ficam fora do repositório.
 """
@@ -27,7 +27,10 @@ import tempfile
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # packaging/windows/ -> raiz
 SRC = os.path.join(RAIZ, "src")
 sys.path.insert(0, SRC)
-from version import __version__  # noqa: E402
+try:  # pacote cnablens (v0.3.0+); a estrutura antiga vale para compilar tags ate a v0.2.0
+    from cnablens.version import __version__  # noqa: E402
+except ModuleNotFoundError:
+    from version import __version__  # noqa: E402
 
 NOME = "CNABLens"
 DESCRICAO = "CNABLens: lente para arquivos CNAB400 e CNAB240 (remessa e retorno de cobrança)"

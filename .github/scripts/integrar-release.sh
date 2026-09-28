@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # "Integrar release": com TODOS os PRs de um milestone aprovados (label "aprovado") e com a CI verde,
 # cria (ou reaproveita) release/x.y.z a partir da develop, mescla as features UMA POR UMA, atualiza a
-# versao (src/version.py) e o CHANGELOG e envia a branch. O push dispara o workflow "Build release
+# versao (arquivo de versao, via versao.sh) e o CHANGELOG e envia a branch. O push dispara o workflow "Build release
 # candidata" (testes, build, pre-release vX.Y.Z-rc.N) e, depois dele, a homologacao (ver
 # homologar-release.sh).
 #
@@ -92,7 +92,7 @@ fi
 echo "Integrando $tag: ${#refs[@]} PR(s) aprovado(s) em $branch."
 if [ "$SIMULAR" = true ]; then
   for r in "${refs[@]}"; do echo "[simulado] mesclar $r em $branch (--no-ff)"; done
-  echo "[simulado] atualizar src/version.py e CHANGELOG.md para $v; enviar $branch (dispara a release candidata)"
+  echo "[simulado] atualizar $(bash "$AQUI/versao.sh" --arquivo) e CHANGELOG.md para $v; enviar $branch (dispara a release candidata)"
   exit 0
 fi
 
@@ -119,7 +119,7 @@ fi
 jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | select(.[3] != "true") | {numero: (.[0] | tonumber), tipo: .[2], titulo: .[4]})' \
   <<<"$itens_tsv" > "${RUNNER_TEMP:-/tmp}/itens.json"
 python3 "$AQUI/atualizar_release.py" --versao "$v" --data "$(date -u +%F)" --itens "${RUNNER_TEMP:-/tmp}/itens.json"
-git add src/version.py CHANGELOG.md
+git add "$(bash "$AQUI/versao.sh" --arquivo)" CHANGELOG.md
 if ! git diff --cached --quiet; then git commit -q -m "chore(release): v$v"; fi
 
 if git diff --quiet "origin/$branch" HEAD 2>/dev/null && git rev-parse -q --verify "origin/$branch" >/dev/null; then

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Atualiza a versao (src/version.py) e a secao da versao no CHANGELOG.md para uma release.
+"""Atualiza a versao (arquivo de versao: src/cnablens/version.py ou src/version.py) e a secao da versao no CHANGELOG.md para uma release.
 
     atualizar_release.py --versao 0.2.0 --data 2026-10-01 --itens itens.json [--raiz .]
 
@@ -49,8 +49,20 @@ def atualizar_versao(texto, versao):
     # sem ancora de fim de linha: funciona com LF e CRLF
     novo, n = re.subn(r'^__version__ = "[^"]*"', f'__version__ = "{versao}"', texto, flags=re.M)
     if n != 1:
-        raise SystemExit("src/version.py: linha __version__ nao encontrada")
+        raise SystemExit("arquivo de versao: linha __version__ nao encontrada")
     return novo
+
+
+ARQUIVOS_DE_VERSAO = (os.path.join("src", "cnablens", "version.py"), os.path.join("src", "version.py"))
+
+
+def arquivo_de_versao(raiz):
+    """Caminho (relativo a raiz) do arquivo de versao: o do pacote (v0.3.0+) ou o da estrutura antiga.
+    Mesma regra do versao.sh."""
+    for caminho in ARQUIVOS_DE_VERSAO:
+        if os.path.isfile(os.path.join(raiz, caminho)):
+            return caminho
+    raise SystemExit("arquivo de versao nao encontrado (src/cnablens/version.py ou src/version.py)")
 
 
 def main(argv=None):
@@ -65,7 +77,7 @@ def main(argv=None):
     with open(a.itens, encoding="utf-8") as f:
         itens = json.load(f)
     alterados = []
-    for caminho, funcao in ((os.path.join("src", "version.py"), lambda t: atualizar_versao(t, a.versao)),
+    for caminho, funcao in ((arquivo_de_versao(a.raiz), lambda t: atualizar_versao(t, a.versao)),
                             ("CHANGELOG.md", lambda t: atualizar_changelog(t, a.versao, a.data, itens))):
         completo = os.path.join(a.raiz, caminho)
         with open(completo, encoding="utf-8", newline="") as f:

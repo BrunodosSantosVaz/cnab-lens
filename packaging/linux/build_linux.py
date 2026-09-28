@@ -26,7 +26,10 @@ import tempfile
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # packaging/linux/ -> raiz
 SRC = os.path.join(RAIZ, "src")
 sys.path.insert(0, SRC)
-from version import __version__  # noqa: E402
+try:  # pacote cnablens (v0.3.0+); a estrutura antiga vale para compilar tags ate a v0.2.0
+    from cnablens.version import __version__  # noqa: E402
+except ModuleNotFoundError:
+    from version import __version__  # noqa: E402
 
 NOME = "CNABLens"
 
