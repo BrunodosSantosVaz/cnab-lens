@@ -120,6 +120,15 @@ class VerPaineis(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("Nenhuma issue aberta.", r.stdout)
 
+    def test_falha_do_gh_derruba_o_script(self):
+        with open(os.path.join(self.bin, "gh"), "w", encoding="utf-8", newline="\n") as f:
+            f.write("#!/usr/bin/env bash\necho 'HTTP 401: Bad credentials' >&2\nexit 1\n")
+        r = self.rodar(SCRIPT, PROJETO_EXECUCAO="11", GITHUB_STEP_SUMMARY=posix(self.resumo))
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("Bad credentials", r.stderr)
+        self.assertNotIn("Nenhuma issue aberta.", r.stdout)
+        self.assertFalse(os.path.exists(self.resumo))
+
     def test_somente_leitura(self):
         self.rodar(SCRIPT, PROJETO_PLANEJAMENTO="10", PROJETO_EXECUCAO="11", PROJETO_BUGS="12")
         self.assertNotIn("mutation", self.chamadas())

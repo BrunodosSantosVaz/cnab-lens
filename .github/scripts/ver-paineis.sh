@@ -7,16 +7,18 @@
 # Variaveis: PROJETO_PLANEJAMENTO, PROJETO_EXECUCAO, PROJETO_BUGS (numeros dos paineis; o que
 # estiver vazio e pulado), GITHUB_STEP_SUMMARY (opcional: recebe a mesma saida em Markdown).
 set -euo pipefail
+shopt -s inherit_errexit  # falha do gh dentro de $(...) derruba o script (nao vira "nenhuma issue")
 
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 projeto() { bash "$AQUI/projeto.sh" "$@"; }
 
 # painel <nome> <numero>: imprime o painel em Markdown
 painel() {
-  local nome="$1" numero="$2" quadro coluna linhas
+  local nome="$1" numero="$2" colunas quadro coluna linhas
+  colunas=$(projeto colunas "$numero")
+  quadro=$(projeto quadro "$numero")
   echo "## $nome (painel $numero)"
   echo
-  quadro=$(projeto quadro "$numero")
   # colunas na ordem do painel; "-" (sem Status) por ultimo
   while IFS= read -r coluna; do
     linhas=$(awk -F'\t' -v c="$coluna" '$1 == c' <<<"$quadro")
@@ -25,7 +27,7 @@ painel() {
     echo
     awk -F'\t' '{ printf "- #%s %s", $2, $3; if ($4 != "-") printf " (%s)", $4; print "" }' <<<"$linhas"
     echo
-  done < <(projeto colunas "$numero"; echo "-")
+  done <<<"$colunas"$'\n-'
   [ -n "$quadro" ] || { echo "Nenhuma issue aberta."; echo; }
 }
 
