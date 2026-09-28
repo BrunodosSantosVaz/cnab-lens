@@ -8,6 +8,11 @@
 #       (use "-" para "sem status"); evita mandar o cartao para tras.
 #   projeto.sh cartoes <painel> "<Status>"
 #       Imprime os numeros das issues deste repositorio que estao no Status.
+#   projeto.sh colunas <painel>
+#       Imprime as colunas (opcoes do Status) do painel, na ordem do painel.
+#   projeto.sh quadro <painel>
+#       Imprime as issues ABERTAS deste repositorio no painel: <Status>\t<n>\t<titulo>\t<Sprint>
+#       ("-" quando nao tem Status ou Sprint). Somente leitura.
 #   projeto.sh remover <painel> <issue>
 #       Tira a issue do painel.
 #   projeto.sh sprint <painel> <issue> ["<Sprint N>"|atual]
@@ -149,6 +154,27 @@ cartoes() {
       | .content.number"
 }
 
+colunas() {
+  gh api graphql -F n="$1" -f o="$PROJETO_OWNER" -f query='
+    query($o:String!,$n:Int!){ repositoryOwner(login:$o){
+      ... on ProjectV2Owner { projectV2(number:$n){
+        field(name:"Status"){ ... on ProjectV2SingleSelectField { options{ name } } } } } } }' \
+    --jq '.data.repositoryOwner.projectV2.field.options[].name'
+}
+
+quadro() {
+  local pid; pid=$(projeto_id "$1")
+  gh api graphql --paginate -f id="$pid" -f query='
+    query($id:ID!,$endCursor:String){ node(id:$id){ ... on ProjectV2 {
+      items(first:100, after:$endCursor){ pageInfo{ hasNextPage endCursor } nodes{
+        status: fieldValueByName(name:"Status"){ ... on ProjectV2ItemFieldSingleSelectValue { name } }
+        sprint: fieldValueByName(name:"Sprint"){ ... on ProjectV2ItemFieldIterationValue { title } }
+        content{ ... on Issue { number title state repository{ nameWithOwner } } } } } } } }' \
+    --jq ".data.node.items.nodes[]
+      | select(.content.repository.nameWithOwner==\"$GITHUB_REPOSITORY\" and .content.state==\"OPEN\")
+      | [(.status.name // \"-\"), .content.number, .content.title, (.sprint.title // \"-\")] | @tsv"
+}
+
 remover() {
   local painel="$1" issue="$2" pid node item
   if [ "${DRY_RUN:-}" = 1 ]; then echo "[simulado] remover #$issue do painel $painel"; return 0; fi
@@ -166,9 +192,11 @@ cmd="${1:-}"; shift || true
 case "$cmd" in
   mover)   mover "$@" ;;
   cartoes) cartoes "$@" ;;
+  colunas) colunas "$@" ;;
+  quadro)  quadro "$@" ;;
   remover) remover "$@" ;;
   sprint)  sprint "$@" ;;
   sprint-atual) sprint_atual "$@" ;;
   sprint-de) sprint_de "$@" ;;
-  *) sed -n '2,26p' "$0"; exit 2 ;;
+  *) sed -n '2,31p' "$0"; exit 2 ;;
 esac

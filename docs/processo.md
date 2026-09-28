@@ -124,6 +124,11 @@ essa resposta, é tratado como "muda o programa" (o caminho seguro, que exige ve
 | **Reprovado** | você testou e não está ok | **você** (arrastar o cartão) |
 | **Concluído / Corrigido** | publicado em produção | *Publicar em produção* (ou *Publicar sem executável*) |
 
+Para ler os painéis sem abrir o GitHub Projects (é o caminho da IA, que não alcança a API dos painéis), rode
+o botão **Ver painéis** (`gh workflow run ver-paineis.yml`): ele lista, coluna por coluna, as issues abertas de
+cada painel, com a Sprint, no log e no resumo da execução. Não move nada. Como o repositório é público, o
+resultado também é.
+
 Não confunda os dois "aprovados": a **label `aprovado` no PR** significa "revisei o código, pode entrar na
 release" (dispara a integração); o **cartão *Aprovado*** significa "testei os executáveis da candidata, pode ir
 para produção" (libera o portão da produção).
@@ -415,6 +420,7 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 | `Pós-publicação da release` | após `Publicar release` | caminho manual: encerra issues e devolve a `main` |
 | `Encerrar sprint` | **botão** | refaz/completa a limpeza pós-produção de uma versão |
 | `Build de tarefa` | merge na `develop` | artefato temporário para testar a tarefa |
+| `Ver painéis` | **botão** | somente leitura: lista as issues abertas de cada coluna dos três painéis no log e no resumo da execução |
 
 Os botões rodam pela aba **Actions** ou por
 `gh workflow run <arquivo>.yml -f versao=v0.2.0 -f simular=false` (sprint sem versão: sem o `-f versao`).

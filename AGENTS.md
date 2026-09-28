@@ -62,10 +62,12 @@ A saída dos compiladores vai para `build-local/`, que é ignorada pelo Git. Apa
    `requirements-build.txt`). Tudo o mais é `sem-executavel`: roda sem versão e sem milestone.
 4. **Uma tarefa = uma branch `feature/<n>-<slug>` = um PR para a `develop`**, com `Refs #<n>` (nunca
    `Closes`: as issues fecham sozinhas na publicação).
-5. **Ao começar a programar uma tarefa, mova o cartão para *Code*:**
+5. **Para ver as colunas dos painéis**, rode o botão *Ver painéis* (`gh workflow run ver-paineis.yml`, somente
+   leitura) e leia o resumo da execução. Na sessão do Claude Code a API dos painéis não é alcançável.
+6. **Ao começar a programar uma tarefa, mova o cartão para *Code*:**
    `PROJETO_OWNER=BrunodosSantosVaz GITHUB_REPOSITORY=BrunodosSantosVaz/cnab-lens bash .github/scripts/projeto.sh mover 11 <n> "Code"`.
-6. **Todo PR tem testes** e a CI verde (`check` e `regras` são obrigatórios).
-7. **PR `sem-executavel` não leva a label `aprovado`**: é mesclado direto na `develop` (merge commit, na
+7. **Todo PR tem testes** e a CI verde (`check` e `regras` são obrigatórios).
+8. **PR `sem-executavel` não leva a label `aprovado`**: é mesclado direto na `develop` (merge commit, na
    ordem das dependências) e finalizado por *Publicar sem executável*. PR que muda o programa leva
    `aprovado`, e a esteira integra a release e gera a candidata para homologação.
 
