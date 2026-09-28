@@ -2,6 +2,8 @@
 .venv/
 __pycache__/
 *.pyc
+# Metadados gerados por `pip install -e .` (pyproject.toml)
+*.egg-info/
 
 # Arquivos temporários do PyInstaller (o build_exe.py já os gera fora do repositório)
 build/
