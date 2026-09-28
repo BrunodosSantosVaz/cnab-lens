@@ -28,7 +28,7 @@ Consulte **sempre** o `pyproject.toml` antes de assumir qualquer coisa sobre o p
 |---|---|
 | Rodar o programa | `python src/cnablens/__main__.py` (ou `python -m cnablens` com `pip install -e .`) |
 | Testes (obrigatório antes de todo commit) | `python -m unittest discover -s tests` |
-| Lint | `uvx ruff check .` |
+| Lint (roda na CI; tem que ficar sem avisos) | `uvx ruff check .` |
 | Regenerar os exemplos fictícios | `python scripts/gerar_exemplos.py` (o CI confere que `exemplos/` está em dia) |
 | Compilar para Windows | `python packaging/windows/build_exe.py` (num Windows, com `pip install -r requirements-build.txt`) |
 | Compilar para Linux | `bash packaging/linux/compilar.sh` (Docker; veja `packaging/linux/README.md`) |
@@ -41,7 +41,11 @@ A saída dos compiladores vai para `build-local/`, que é ignorada pelo Git. Apa
 
 | Pasta | Conteúdo |
 |---|---|
-| `src/` | O programa. Mexer aqui **muda o executável** e exige uma versão nova. |
+| `src/cnablens/` | O programa (pacote). Mexer aqui **muda o executável** e exige uma versão nova. |
+| `src/cnablens/leitura/` | Leitura dos arquivos: `CnabFile` e um leitor por formato (`leitor400.py`, `leitor240.py`). Sem Tkinter. |
+| `src/cnablens/layouts/` | Layouts dos bancos: dados em um módulo por banco, blocos em `base.py`, registro no `__init__.py`. |
+| `src/cnablens/formatacao.py` | Valores em R$ e datas. Sem Tkinter. |
+| `src/cnablens/interface/` | A tela (Tkinter). Só apresenta: não põe regra de leitura aqui. |
 | `tests/` | Testes (`unittest`), inclusive dos scripts da esteira. |
 | `packaging/windows/`, `packaging/linux/` | Compiladores. |
 | `scripts/` | Utilitários (`gerar_exemplos.py`) e configuração do GitHub (`processo/`). |
@@ -85,6 +89,14 @@ A saída dos compiladores vai para `build-local/`, que é ignorada pelo Git. Apa
   lacunas (há teste de contiguidade).
 - Código simples: funções curtas, uma responsabilidade por módulo, sem repetição. Prefira ajustar o que
   já existe a criar outro caminho para a mesma coisa.
+- **Onde fica cada coisa**: regra de formato na leitura (o leitor do formato), dado de banco no módulo do
+  layout, formatação em `formatacao.py`, tela em `interface/`. A interface nunca lê o arquivo nem formata
+  sozinha, e a leitura nunca importa Tkinter (há teste para isso).
+- **Banco novo** = módulo de dados em `layouts/` + entrada no registro (`layouts/__init__.py`). A leitura
+  e a tela não mudam.
+- **Refatoração não muda comportamento**: o teste de equivalência (`tests/test_equivalencia.py`) compara
+  a leitura com um retrato guardado. Só regenere o retrato (`--gerar`) quando a mudança de comportamento
+  for intencional, e diga isso no PR.
 - Os campos de "Uso Reservado (Filler)", os nomes de campo usados na grade (`Nosso Número`, `Valor
   Nominal`, `Data de Vencimento`…) e a formatação de valores e datas seguem as convenções do README
   ("Adicionando um novo layout").

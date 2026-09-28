@@ -65,6 +65,18 @@ class Documentacao(unittest.TestCase):
             with self.subTest(comando=arquivo):
                 self.assertTrue(os.path.isfile(os.path.join(_caminho.RAIZ, arquivo)), arquivo)
 
+    def test_nenhum_documento_cita_os_modulos_antigos(self):
+        antigos = r"cnab400_reader\.py|cnab400_layouts?\.py|cnab400_layout_\w+\.py|cnab240_layout_\w+\.py"
+        for doc in DOCUMENTOS + ["CONTRIBUTING.md"]:
+            with self.subTest(doc=doc):
+                self.assertNotRegex(self.ler(doc), antigos)
+
+    def test_readme_descreve_o_pacote(self):
+        readme = self.ler("README.md")
+        for trecho in ("src/cnablens/", "leitor400.py", "layouts/", "python -m cnablens", "Adicionando um novo layout"):
+            with self.subTest(trecho=trecho):
+                self.assertIn(trecho, readme)
+
     def test_linux_documentado_no_readme(self):
         readme = self.ler("README.md")
         for trecho in ("packaging/linux/README.md", "CNABLens-vX.Y.Z-linux-x64", "SHA256SUMS-linux.txt", "bash packaging/linux/compilar.sh"):
