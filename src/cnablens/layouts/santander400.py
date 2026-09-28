@@ -747,24 +747,3 @@ ERRO_OCORRENCIA_CODES = {  # nota 31: códigos de erro/ocorrência do retorno (p
     "516": "Instrução recusada, convenio com garantia em conta Escrow",
     "517": "Instrução não aceita – Pix Automático",
 }
-
-
-def _validate_contiguous(fields, name, width=400):
-    """Confere que a lista cobre 1..400 sem lacunas nem sobreposição e que cada campo tem título e descrição."""
-    esperado = 1
-    for campo in fields:
-        assert len(campo) == 4, f"{name}: campo com {len(campo)} itens: {campo!r}"
-        titulo, inicio, fim, descricao = campo
-        assert titulo and descricao, f"{name}: campo sem título ou descrição em {inicio}"
-        assert inicio == esperado, f"{name}: '{titulo}' começa em {inicio}, esperado {esperado}"
-        assert fim >= inicio, f"{name}: '{titulo}' termina antes de começar ({inicio}-{fim})"
-        esperado = fim + 1
-    assert esperado - 1 == width, f"{name}: termina em {esperado - 1}, esperado {width}"
-
-
-
-if __name__ == "__main__":
-    listas = [(n, v) for n, v in sorted(globals().items()) if n.endswith("_FIELDS") and isinstance(v, list)]
-    for nome, campos in listas:
-        _validate_contiguous(campos, nome)
-        print(f"{nome}: {len(campos)} campos, 1..400 OK")

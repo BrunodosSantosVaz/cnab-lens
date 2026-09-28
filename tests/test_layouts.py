@@ -10,13 +10,10 @@ from cnablens.layouts import santander400
 from cnablens.layouts import sicoob400
 from cnablens.layouts import sicredi400 as sicredi
 from cnablens import layouts
+from cnablens.layouts import bancos
+from cnablens.layouts.__main__ import MODULOS, listas_de_campos
+from cnablens.layouts.base import PorTipo, RegistroOpcional, validar_contiguidade
 
-MODULOS = [(febraban, 400), (sicredi, 400), (sicoob400, 400), (santander400, 400), (sicoob240, 240), (santander240, 240)]
-
-
-def listas_de_campos(modulo):
-    return [(nome, valor) for nome, valor in vars(modulo).items()
-            if nome.endswith("_FIELDS") and isinstance(valor, list)]
 
 
 class TabelasDeCampos(unittest.TestCase):
@@ -24,15 +21,21 @@ class TabelasDeCampos(unittest.TestCase):
         for modulo, largura in MODULOS:
             for nome, campos in listas_de_campos(modulo):
                 with self.subTest(modulo=modulo.__name__, lista=nome):
-                    esperado = 1
-                    for campo in campos:
-                        self.assertEqual(len(campo), 4, campo)
-                        titulo, inicio, fim, descricao = campo
-                        self.assertTrue(titulo and descricao, campo)
-                        self.assertEqual(inicio, esperado, f"{titulo}: começa em {inicio}, esperado {esperado}")
-                        self.assertGreaterEqual(fim, inicio, titulo)
-                        esperado = fim + 1
-                    self.assertEqual(esperado, largura + 1, f"termina em {esperado - 1}")
+                    validar_contiguidade(campos, largura, nome)  # levanta ValueError dizendo onde está o problema
+
+    def test_validacao_aponta_lacuna_e_sobreposicao(self):
+        campos = [("A", 1, 10, "a"), ("B", 12, 400, "b")]
+        with self.assertRaisesRegex(ValueError, "'B' começa em 12, esperado 11"):
+            validar_contiguidade(campos, 400)
+        with self.assertRaisesRegex(ValueError, "termina em 10, esperado 400"):
+            validar_contiguidade([("A", 1, 10, "a")], 400)
+        with self.assertRaisesRegex(ValueError, "sem nome ou descrição"):
+            validar_contiguidade([("A", 1, 400, "")], 400)
+
+    def test_sem_validacao_repetida_nos_modulos_de_dados(self):
+        for modulo, _ in MODULOS:
+            with self.subTest(modulo=modulo.__name__):
+                self.assertFalse(hasattr(modulo, "_validate_contiguous"))
 
     def test_ha_listas_em_cada_modulo(self):
         for modulo, _ in MODULOS:
@@ -124,9 +127,30 @@ class RegistroDeLayouts(unittest.TestCase):
         self.assertIsNone(layouts.LAYOUTS["sicoob240"].structure.chave_segmento)
 
     def test_bancos_conhecidos(self):
-        self.assertEqual(febraban.BANK_NAMES["756"], "Sicoob (Bancoob)")
-        self.assertEqual(febraban.BANK_NAMES["748"], "Sicredi")
-        self.assertEqual(febraban.BANK_NAMES["033"], "Santander")
+        self.assertEqual(bancos.NOMES_DOS_BANCOS["756"], "Sicoob (Bancoob)")
+        self.assertEqual(bancos.NOMES_DOS_BANCOS["748"], "Sicredi")
+        self.assertEqual(bancos.NOMES_DOS_BANCOS["033"], "Santander")
+        self.assertFalse(hasattr(febraban, "BANK_NAMES"))  # a tabela de bancos vale para todos os layouts
+
+
+class BlocosDosLayouts(unittest.TestCase):
+    def test_por_tipo(self):
+        remessa, retorno = [("R", 1, 400, "r")], [("T", 1, 400, "t")]
+        self.assertIs(PorTipo(remessa, retorno)("Remessa"), remessa)
+        self.assertIs(PorTipo(remessa, retorno)("Retorno"), retorno)
+        self.assertIs(PorTipo(remessa, retorno)("Desconhecido"), remessa)  # como antes: só "Retorno" muda
+        self.assertIs(PorTipo.igual(remessa)("Retorno"), remessa)
+
+    def test_registro_opcional(self):
+        registro = RegistroOpcional(remessa=("Registro 8", []))
+        self.assertEqual(registro("Remessa"), ("Registro 8", []))
+        self.assertIsNone(registro("Retorno"))
+
+    def test_todo_layout_tem_a_mesma_interface(self):
+        for chave, layout in layouts.LAYOUTS.items():
+            with self.subTest(layout=chave):
+                for atributo in ("key", "label", "width", "ocorrencia_codes", "comando_codes", "structure", "record_types"):
+                    self.assertTrue(hasattr(layout, atributo), atributo)
 
 
 if __name__ == "__main__":

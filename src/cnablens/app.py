@@ -17,7 +17,7 @@ import tkinter.font as tkfont
 from tkinter import ttk, filedialog, messagebox
 
 from cnablens import layouts
-from cnablens.layouts import febraban400 as layout
+from cnablens.layouts.bancos import NOMES_DOS_BANCOS
 from cnablens.version import __version__
 
 TITULO_APP = f"CNABLens v{__version__}"
@@ -279,7 +279,7 @@ class CnabFile:
                     ("Retorno" if "RETORNO" in header_rec.raw.upper() else "Desconhecido")
             self.banco_codigo = safe_slice(header_rec.raw, 77, 79)
             banco_literal = safe_slice(header_rec.raw, 80, 94)
-            self.banco_nome = layout.BANK_NAMES.get(self.banco_codigo, banco_literal)
+            self.banco_nome = NOMES_DOS_BANCOS.get(self.banco_codigo, banco_literal)
             self.empresa_nome = safe_slice(header_rec.raw, 47, 76)
             self.data_geracao = self._parse_data_geracao(header_rec.raw)
         else:
@@ -315,7 +315,7 @@ class CnabFile:
                 self.tipo_arquivo = "Desconhecido"
         self.banco_codigo = safe_slice(header_rec.raw, 1, 3)
         banco_literal = safe_slice(header_rec.raw, 103, 132)
-        self.banco_nome = layout.BANK_NAMES.get(self.banco_codigo, banco_literal)
+        self.banco_nome = NOMES_DOS_BANCOS.get(self.banco_codigo, banco_literal)
         self.empresa_nome = safe_slice(header_rec.raw, 73, 102)
         self.data_geracao = format_data(safe_slice(header_rec.raw, 144, 151))
 
@@ -359,7 +359,7 @@ class CnabFile:
                 campos = estrutura.trailer_arquivo(tipo)
             else:
                 campos = None
-            rec.set_fields(campos or layouts.unmapped_fields(240))
+            rec.set_fields(campos or layouts.campos_nao_mapeados(240))
 
         cabecalho = [r for r in self.records if r.tipo in ("header_arquivo", "header_lote")]
         rodape = [r for r in self.records if r.tipo in ("trailer_lote", "trailer_arquivo")]

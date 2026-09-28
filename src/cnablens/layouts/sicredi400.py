@@ -4,7 +4,7 @@ CNAB400 Sicredi - field layout reference data.
 
 Unlike most bancos, o Sicredi NÃO usa o layout "genérico" de cobrança CNAB400
 (o mesmo que Itaú/BB/Bradesco/Caixa etc. compartilham, representado em
-`cnab400_layout.py`). O Sicredi define seu próprio conjunto de campos/posições
+`febraban400.py`). O Sicredi define seu próprio conjunto de campos/posições
 para Header, Detalhe e Trailer, tanto na Remessa quanto no Retorno - por isso
 este módulo existe separadamente.
 
@@ -25,7 +25,7 @@ diferentes do padrão FEBRABAN genérico):
     pelo "Código do beneficiário/cedente" (posições 27-31) e pelo CPF/CNPJ
     (32-45), cadastrados previamente na Cooperativa.
   - A data de geração do Header vem em AAAAMMDD (8 posições, 95-102), não em
-    DDMMAA (6 posições) como no padrão genérico - `cnab400_reader.py` já
+    DDMMAA (6 posições) como no padrão genérico - a leitura do programa já
     trata essa variação de formato automaticamente.
   - O "Nosso Número" do Sicredi tem formato próprio "AA/BXXXXX-D" (seção 4.4
     do manual): AA = ano, B = byte de geração, XXXXX = sequencial livre,
@@ -382,27 +382,3 @@ OCORRENCIA_CODES = {
     "84": "Exclusão de Negativação por Outros Motivos",
     "85": "Ocorrência Informacional por Outros Motivos",
 }
-
-
-def _validate_contiguous(fields, name):
-    """Sanity check: positions must run 1..400 with no gaps/overlaps."""
-    expected = 1
-    for field_name, start, end, _desc in fields:
-        if start != expected or end < start:
-            raise AssertionError(
-                "%s: gap/overlap near field %r (expected start %d, got %d-%d)"
-                % (name, field_name, expected, start, end)
-            )
-        expected = end + 1
-    if expected != 401:
-        raise AssertionError("%s: fields end at %d, expected 400" % (name, expected - 1))
-
-
-if __name__ == "__main__":
-    _validate_contiguous(HEADER_REMESSA_FIELDS, "HEADER_REMESSA_FIELDS")
-    _validate_contiguous(DETAIL_REMESSA_FIELDS, "DETAIL_REMESSA_FIELDS")
-    _validate_contiguous(HEADER_RETORNO_FIELDS, "HEADER_RETORNO_FIELDS")
-    _validate_contiguous(DETAIL_RETORNO_FIELDS, "DETAIL_RETORNO_FIELDS")
-    _validate_contiguous(TRAILER_FIELDS, "TRAILER_FIELDS")
-    print("All Sicredi field layouts are contiguous and cover positions 1-400.")
-    print("OCORRENCIA_CODES: %d entries" % len(OCORRENCIA_CODES))
