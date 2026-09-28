@@ -79,10 +79,10 @@ O nome do arquivo carrega o estágio, mas o **conteúdo do binário é o mesmo**
 produção (o `rc` só existe no nome, e o SHA-256 é idêntico). Os executáveis ficam **só nas Releases**,
 não no repositório.
 
-O `.exe` é compilado por `scripts/build_exe.py` no Windows do CI. O executável Linux é compilado por
-`linux/build_linux.py` com as mesmas opções do PyInstaller, dentro do container
+O `.exe` é compilado por `packaging/windows/build_exe.py` no Windows do CI. O executável Linux é compilado por
+`packaging/linux/build_linux.py` com as mesmas opções do PyInstaller, dentro do container
 `quay.io/pypa/manylinux_2_28_x86_64` (glibc 2.28), para rodar em qualquer distro com glibc 2.28 ou mais
-nova. Para compilar localmente: `bash linux/compilar.sh` (veja [`linux/README.md`](../linux/README.md)).
+nova. Para compilar localmente: `bash packaging/linux/compilar.sh` (veja [`packaging/linux/README.md`](../packaging/linux/README.md)).
 
 ## Sprint não é versão
 
@@ -189,7 +189,7 @@ Tudo continua possível **pela tag**, com ou sem a branch de release:
 |---|---|
 | **Usar** a versão antiga | Baixar o executável da [Release](https://github.com/BrunodosSantosVaz/cnab-lens/releases) da versão. Para um app compilado, esse é o rollback: não há servidor para voltar. |
 | **Ver o código** como estava | `git switch --detach v0.1.0`, ou no GitHub em *Code → Tags → v0.1.0*. `git show v0.1.0:src/version.py` mostra `0.1.0`. |
-| **Recompilar** a versão antiga | Linux: `bash linux/compilar.sh v0.1.0`. Windows: `git switch --detach v0.1.0` e `python scripts\build_exe.py`. |
+| **Recompilar** a versão antiga | Linux: `bash packaging/linux/compilar.sh v0.1.0`. Windows: `git switch --detach v0.1.0` e `python packaging\windows\build_exe.py`. |
 | **Corrigir** a versão antiga (hotfix) | `git switch -c hotfix/<n>-<slug> v0.1.0`: a tag é o ponto de partida, e o fluxo de hotfix segue igual. |
 | **Voltar a `main`** para o código antigo | `git revert` dos commits posteriores (ou uma versão nova que desfaz a mudança), por PR, como qualquer alteração. |
 
@@ -330,7 +330,7 @@ label **`sem-executavel`**.
 
 **O critério é objetivo:** uma mudança altera o executável se toca `src/` (código do programa) ou
 `requirements-build.txt` (o que é empacotado). Qualquer outra coisa é `sem-executavel`. (Os compiladores
-`scripts/build_exe.py` e `linux/build_linux.py` não contam; o `conferir-release` continua tratando os dois
+`packaging/windows/build_exe.py` e `packaging/linux/build_linux.py` não contam; o `conferir-release` continua tratando os dois
 como parte do binário nas releases normais.)
 
 ### Como a label é aplicada

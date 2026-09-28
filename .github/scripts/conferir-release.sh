@@ -20,9 +20,9 @@ rc_tag=$(git tag -l "v${versao}-rc.*" | sort -V | tail -n 1)
   exit 1
 }
 
-if ! git diff --quiet "$rc_tag" HEAD -- src scripts/build_exe.py linux/build_linux.py requirements-build.txt; then
+if ! git diff --quiet "$rc_tag" HEAD -- src packaging/windows/build_exe.py packaging/linux/build_linux.py requirements-build.txt; then
   echo "::error::O codigo mudou depois da candidata ${rc_tag}. Envie um push na branch de release para gerar uma nova candidata, teste-a e so entao publique."
-  git diff --stat "$rc_tag" HEAD -- src scripts/build_exe.py linux/build_linux.py requirements-build.txt
+  git diff --stat "$rc_tag" HEAD -- src packaging/windows/build_exe.py packaging/linux/build_linux.py requirements-build.txt
   exit 1
 fi
 

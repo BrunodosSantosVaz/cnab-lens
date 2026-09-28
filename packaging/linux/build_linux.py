@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Gera o executável Linux (arquivo único) do CNABLens. Espelho do scripts/build_exe.py do Windows.
+"""Gera o executável Linux (arquivo único) do CNABLens. Espelho do packaging/windows/build_exe.py.
 
-    python linux/build_linux.py                    # build-local/ (ignorada pelo git)
-    python linux/build_linux.py --saida PASTA      # outra pasta
-    python linux/build_linux.py --rc 2 --saida rc  # release candidata: CNABLens-v<versão>-rc.2-...
+    python packaging/linux/build_linux.py                    # build-local/ (ignorada pelo git)
+    python packaging/linux/build_linux.py --saida PASTA      # outra pasta
+    python packaging/linux/build_linux.py --rc 2 --saida rc  # release candidata: CNABLens-v<versão>-rc.2-...
 
-Para o executável rodar em qualquer distro, compile pelo linux/compilar.sh (container antigo,
+Para o executável rodar em qualquer distro, compile pelo packaging/linux/compilar.sh (container antigo,
 glibc 2.28). Este script compila com o Python que o chamar, que precisa ter Tkinter.
 
 Requer Python 3.10+ (com Tkinter) e PyInstaller (`pip install -r requirements-build.txt`).
@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 
-RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # packaging/linux/ -> raiz
 SRC = os.path.join(RAIZ, "src")
 sys.path.insert(0, SRC)
 from version import __version__  # noqa: E402

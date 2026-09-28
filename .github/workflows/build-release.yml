@@ -67,7 +67,7 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Compilar
         if: steps.v.outputs.pular != 'true'
-        run: python scripts/build_exe.py --rc ${{ steps.v.outputs.n }} --saida rc
+        run: python packaging/windows/build_exe.py --rc ${{ steps.v.outputs.n }} --saida rc
       - name: Atestar procedencia
         if: steps.v.outputs.pular != 'true'
         uses: actions/attest-build-provenance@v2
@@ -96,7 +96,7 @@ jobs:
           VIRTUAL_ENV=/tmp/venv /opt/python/cp312-cp312/bin/uv pip install -q -r requirements-build.txt
       - name: Compilar
         run: |
-          /tmp/venv/bin/python linux/build_linux.py --rc ${{ needs.candidata.outputs.n }} --saida rc-linux
+          /tmp/venv/bin/python packaging/linux/build_linux.py --rc ${{ needs.candidata.outputs.n }} --saida rc-linux
           mv rc-linux/SHA256SUMS.txt rc-linux/SHA256SUMS-linux.txt
       - name: Guardar o executavel Linux para a pre-release
         uses: actions/upload-artifact@v4

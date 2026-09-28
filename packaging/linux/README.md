@@ -47,17 +47,17 @@ do [uv](https://docs.astral.sh/uv/), que já traz o Tk. Nada é instalado no seu
 `docker run`).
 
 ```bash
-bash linux/compilar.sh                  # versão atual (src/version.py), em build-local/
-bash linux/compilar.sh v0.2.0           # a partir de uma tag (git fetch --tags antes)
-bash linux/compilar.sh --saida PASTA    # outra pasta de saída
-bash linux/compilar.sh --rc 2           # nome de candidata: CNABLens-vX.Y.Z-rc.2-linux-x64
-bash linux/compilar.sh --help
+bash packaging/linux/compilar.sh                  # versão atual (src/version.py), em build-local/
+bash packaging/linux/compilar.sh v0.2.0           # a partir de uma tag (git fetch --tags antes)
+bash packaging/linux/compilar.sh --saida PASTA    # outra pasta de saída
+bash packaging/linux/compilar.sh --rc 2           # nome de candidata: CNABLens-vX.Y.Z-rc.2-linux-x64
+bash packaging/linux/compilar.sh --help
 ```
 
 Resultado: `CNABLens-vX.Y.Z-linux-x64` e o `SHA256SUMS.txt`. A primeira execução baixa a imagem do
 container (cerca de 2,5 GB descompactada) e leva alguns minutos.
 
-**Sem Docker:** `bash linux/compilar.sh --sem-docker` compila no seu próprio computador (precisa do
+**Sem Docker:** `bash packaging/linux/compilar.sh --sem-docker` compila no seu próprio computador (precisa do
 `uv`). O executável gerado só roda em distros com glibc **igual ou mais nova** que a da sua máquina, por
 isso não serve para distribuir.
 
@@ -65,11 +65,11 @@ isso não serve para distribuir.
 
 | Arquivo | Papel |
 |---------|-------|
-| `linux/build_linux.py` | Chama o PyInstaller com as mesmas opções do `scripts/build_exe.py` do Windows (`--onefile --windowed`, `src/cnab400_reader.py`) e grava o executável com o SHA-256. Pode ser chamado direto, com um Python que tenha Tkinter e o PyInstaller. |
-| `linux/compilar.sh` | Prepara o ambiente (container, uv, Python 3.12 com Tk, `requirements-build.txt`) e chama o `build_linux.py`. Com uma tag, compila o código daquela versão num `git worktree` temporário. |
+| `packaging/linux/build_linux.py` | Chama o PyInstaller com as mesmas opções do `packaging/windows/build_exe.py` do Windows (`--onefile --windowed`, `src/cnab400_reader.py`) e grava o executável com o SHA-256. Pode ser chamado direto, com um Python que tenha Tkinter e o PyInstaller. |
+| `packaging/linux/compilar.sh` | Prepara o ambiente (container, uv, Python 3.12 com Tk, `requirements-build.txt`) e chama o `build_linux.py`. Com uma tag, compila o código daquela versão num `git worktree` temporário. |
 
 As versões **oficiais** não são compiladas à mão: a esteira do GitHub gera o `.exe` e o executável Linux
-na mesma release candidata e publica os dois em produção (veja [docs/processo.md](../docs/processo.md)).
+na mesma release candidata e publica os dois em produção (veja [docs/processo.md](../../docs/processo.md)).
 
 ## Rodar pelo código-fonte
 
@@ -86,5 +86,5 @@ python3 src/cnab400_reader.py
 ## Segurança
 
 O executável Linux tem o **SHA-256** publicado na Release (`SHA256SUMS-linux.txt`), mas ainda não tem
-atestado de procedência nem assinatura. Se preferir, compile você mesmo com o `linux/compilar.sh`. Veja
-também a [política de segurança](../SECURITY.md).
+atestado de procedência nem assinatura. Se preferir, compile você mesmo com o `packaging/linux/compilar.sh`. Veja
+também a [política de segurança](../../SECURITY.md).
