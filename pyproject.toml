@@ -1,0 +1,72 @@
+# Configuração do projeto (PEP 621): metadados, versão e ferramentas. É a referência para quem mantém o
+# projeto e para as IAs (veja AGENTS.md).
+#
+# O que NÃO fica aqui, de propósito, para não duplicar:
+#   - a versão: só em src/version.py (lida abaixo, em [tool.setuptools.dynamic]);
+#   - a dependência de build (PyInstaller): só em requirements-build.txt. É o que o Dependabot atualiza e o
+#     que o portão da produção trata como "o que é empacotado" (docs/processo.md).
+# O programa só usa a biblioteca padrão do Python: não há dependências de execução.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cnablens"
+description = "Uma lente para arquivos CNAB: leitor de remessa e retorno CNAB400/240 (FEBRABAN, Sicredi, Sicoob, Santander) para Windows e Linux"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Bruno dos Santos Vaz" }]
+requires-python = ">=3.10"
+dependencies = []
+dynamic = ["version"]
+keywords = ["cnab", "cnab400", "cnab240", "boleto", "remessa", "retorno", "febraban"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Natural Language :: Portuguese (Brazilian)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Office/Business :: Financial",
+]
+
+[project.urls]
+"Código" = "https://github.com/BrunodosSantosVaz/cnab-lens"
+"Downloads" = "https://github.com/BrunodosSantosVaz/cnab-lens/releases/latest"
+"Issues" = "https://github.com/BrunodosSantosVaz/cnab-lens/issues"
+"Processo" = "https://github.com/BrunodosSantosVaz/cnab-lens/blob/main/docs/processo.md"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.dynamic]
+version = { attr = "version.__version__" }
+
+# Ruff: estilo e qualidade do código Python (https://docs.astral.sh/ruff/). Rodar com `ruff check .`
+# (instale com `pip install ruff` ou use `uvx ruff check .`). Obrigatório na CI a partir da v0.3.0.
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes: nomes e imports não usados, erros
+    "B",       # bugbear: armadilhas comuns
+    "UP",      # pyupgrade: sintaxe do Python 3.10+
+    "SIM",     # simplificações
+    "C90",     # complexidade (mccabe)
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.per-file-ignores]
+# módulos de dados de layout: descrições longas transcritas dos manuais dos bancos
+"src/cnab400_layout*.py" = ["E501"]
+"src/cnab240_layout*.py" = ["E501"]
