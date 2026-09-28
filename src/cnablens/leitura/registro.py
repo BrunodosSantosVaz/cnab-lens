@@ -22,49 +22,18 @@ def parse_fields(line, field_defs):
     return result
 
 
-# CNAB240: o tipo de registro fica na posição 8 (e não na 1, como no CNAB400) e
-# os detalhes (tipo 3) se dividem em segmentos identificados por uma letra na
-# posição 14 (P, Q, R... na remessa de cobrança; T, U... no retorno).
-CNAB240_TIPOS = {
-    "0": ("header_arquivo", "Header de Arquivo (Registro 0)"),
-    "1": ("header_lote", "Header de Lote (Registro 1)"),
-    "3": ("detalhe", "Detalhe (Registro 3)"),
-    "5": ("trailer_lote", "Trailer de Lote (Registro 5)"),
-    "9": ("trailer_arquivo", "Trailer de Arquivo (Registro 9)"),
-}
-
-
 class CnabRecord:
-    def __init__(self, index, raw_line, width=400):
+    """Uma linha do arquivo. A classificação (tipo do registro, rótulo e segmento) vem do leitor do formato
+    (leitor400/leitor240); os campos, do layout aplicado (set_fields)."""
+
+    def __init__(self, index, raw_line, tipo_char, tipo, tipo_label, segmento=""):
         self.index = index
         self.raw = raw_line
-        self.width = width
-        self.segmento = ""
-        if width == 240:
-            self.tipo_char = raw_line[7:8] if raw_line else ""
-            if self.tipo_char in CNAB240_TIPOS:
-                self.tipo, self.tipo_label = CNAB240_TIPOS[self.tipo_char]
-            else:
-                self.tipo = "desconhecido"
-                self.tipo_label = f"Desconhecido (código '{self.tipo_char}')"
-            if self.tipo == "detalhe":
-                self.segmento = raw_line[13:14].strip().upper()
-                self.tipo_label = f"Detalhe (Registro 3) - Segmento {self.segmento or '?'}"
-        else:
-            self.tipo_char = raw_line[0:1] if raw_line else ""
-            if self.tipo_char == "0":
-                self.tipo = "header"
-                self.tipo_label = "Header (Registro 0)"
-            elif self.tipo_char == "9":
-                self.tipo = "trailer"
-                self.tipo_label = "Trailer (Registro 9)"
-            elif self.tipo_char == "1":
-                self.tipo = "detalhe"
-                self.tipo_label = "Detalhe (Registro 1)"
-            else:
-                self.tipo = "desconhecido"
-                self.tipo_label = f"Desconhecido (código '{self.tipo_char}')"
-        self.rotulo_padrao = self.tipo_label
+        self.tipo_char = tipo_char
+        self.tipo = tipo            # header, detalhe, trailer, header_lote... ou desconhecido
+        self.tipo_label = tipo_label
+        self.segmento = segmento    # só CNAB 240: letra da posição 14 (P, Q, T, U...)
+        self.rotulo_padrao = tipo_label
         self.fields = []
         self.field_map = {}
 
