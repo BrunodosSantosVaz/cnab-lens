@@ -1,0 +1,25 @@
+# "Ver paineis": lista as issues abertas de cada coluna dos paineis Planejamento, Execucao e Bugs
+# (numero, titulo e Sprint) no log e no resumo da execucao. Somente leitura: nao move nada.
+# O repositorio e publico: o log e o resumo ficam visiveis para qualquer pessoa.
+#   gh workflow run ver-paineis.yml
+name: Ver painéis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ver:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ver painéis
+        run: bash .github/scripts/ver-paineis.sh
+        env:
+          GH_TOKEN: ${{ secrets.PROJETO_TOKEN }}
+          PROJETO_OWNER: ${{ vars.PROJETO_OWNER }}
+          PROJETO_PLANEJAMENTO: ${{ vars.PROJETO_PLANEJAMENTO }}
+          PROJETO_EXECUCAO: ${{ vars.PROJETO_EXECUCAO }}
+          PROJETO_BUGS: ${{ vars.PROJETO_BUGS }}
