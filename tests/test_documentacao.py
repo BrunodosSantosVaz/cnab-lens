@@ -7,7 +7,8 @@ import unittest
 
 import _caminho
 
-DOCUMENTOS = ["README.md", "CONTRIBUTING.md", "SECURITY.md", "docs/processo.md", "packaging/linux/README.md"]
+DOCUMENTOS = ["README.md", "CONTRIBUTING.md", "SECURITY.md", "docs/processo.md", "packaging/linux/README.md",
+              "AGENTS.md"]
 LINK = re.compile(r"\]\(([^)#\s]+)(?:#[^)]*)?\)")
 
 
@@ -48,6 +49,22 @@ class Documentacao(unittest.TestCase):
         for doc in DOCUMENTOS:
             with self.subTest(doc=doc):
                 self.assertNotRegex(self.ler(doc), r"release/\*`?\s*\n?\s*fica|\*\*fica\*\* como histórico")
+
+    def test_instrucoes_para_ias(self):
+        agentes = self.ler("AGENTS.md")
+        self.assertIn("@AGENTS.md", self.ler("CLAUDE.md"))
+        self.assertIn("pyproject.toml", agentes)
+        # todo caminho citado entre crases no AGENTS.md existe (arquivo ou pasta)
+        for caminho in re.findall(r"`((?:src|tests|packaging|scripts|exemplos|docs|\.github)/[\w./-]*)`", agentes):
+            caminho = caminho.split(" ")[0].rstrip("/")
+            if "<" in caminho:
+                continue
+            with self.subTest(caminho=caminho):
+                self.assertTrue(os.path.exists(os.path.join(_caminho.RAIZ, caminho)), caminho)
+        # comandos citados apontam para arquivos que existem
+        for arquivo in re.findall(r"`(?:python|bash) ((?:src|scripts|packaging)/[\w./-]+)", agentes):
+            with self.subTest(comando=arquivo):
+                self.assertTrue(os.path.isfile(os.path.join(_caminho.RAIZ, arquivo)), arquivo)
 
     def test_linux_documentado_no_readme(self):
         readme = self.ler("README.md")
