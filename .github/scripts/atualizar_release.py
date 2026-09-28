@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""Atualiza a versao (arquivo de versao: src/cnablens/version.py ou src/version.py) e a secao da versao no CHANGELOG.md para uma release.
+"""Atualiza a versao (arquivo de versao: src/cnablens/version.py ou src/version.py) e a secao da versao
+no CHANGELOG.md para uma release.
 
     atualizar_release.py --versao 0.2.0 --data 2026-10-01 --itens itens.json [--raiz .]
 

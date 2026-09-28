@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CNAB 240 Santander (banco 033) - Cobrança - referência de campos.
 
@@ -1015,26 +1014,3 @@ BAIXA_CODES = {  # nota 40-C: origem da baixa, com os movimentos 09 e 94 (Segmen
     "93": "Pagamento do boleto recebido",
     "94": "Cancelamento do pagamento recebido",
 }
-
-
-def _validate_contiguous(fields, name, width=240):
-    """Confere que a lista cobre 1..240 sem lacunas nem sobreposição e que cada campo tem título e descrição."""
-    esperado = 1
-    for campo in fields:
-        assert len(campo) == 4, f"{name}: campo com {len(campo)} itens: {campo!r}"
-        titulo, inicio, fim, descricao = campo
-        assert titulo and descricao, f"{name}: campo sem título ou descrição em {inicio}"
-        assert inicio == esperado, f"{name}: '{titulo}' começa em {inicio}, esperado {esperado}"
-        assert fim >= inicio, f"{name}: '{titulo}' termina antes de começar ({inicio}-{fim})"
-        esperado = fim + 1
-    assert esperado - 1 == width, f"{name}: termina em {esperado - 1}, esperado {width}"
-
-
-
-if __name__ == "__main__":
-    listas = [(n, v) for n, v in sorted(globals().items()) if n.endswith("_FIELDS") and isinstance(v, list)]
-    for nome, campos in listas:
-        _validate_contiguous(campos, nome)
-        print(f"{nome}: {len(campos)} campos, 1..240 OK")
-    for chave, campos in SEGMENTOS.items():
-        assert any("código de movimento" in c[0].lower() for c in campos), f"{chave}: sem Código de Movimento"

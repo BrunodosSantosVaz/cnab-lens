@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Documentação: os links relativos dos documentos principais apontam para arquivos que existem, e
 nenhum documento cita a antiga pasta releases/ do repositório (os executáveis ficam só nas Releases)."""
 import os
@@ -65,6 +64,18 @@ class Documentacao(unittest.TestCase):
         for arquivo in re.findall(r"`(?:python|bash) ((?:src|scripts|packaging)/[\w./-]+)", agentes):
             with self.subTest(comando=arquivo):
                 self.assertTrue(os.path.isfile(os.path.join(_caminho.RAIZ, arquivo)), arquivo)
+
+    def test_nenhum_documento_cita_os_modulos_antigos(self):
+        antigos = r"cnab400_reader\.py|cnab400_layouts?\.py|cnab400_layout_\w+\.py|cnab240_layout_\w+\.py"
+        for doc in DOCUMENTOS + ["CONTRIBUTING.md"]:
+            with self.subTest(doc=doc):
+                self.assertNotRegex(self.ler(doc), antigos)
+
+    def test_readme_descreve_o_pacote(self):
+        readme = self.ler("README.md")
+        for trecho in ("src/cnablens/", "leitor400.py", "layouts/", "python -m cnablens", "Adicionando um novo layout"):
+            with self.subTest(trecho=trecho):
+                self.assertIn(trecho, readme)
 
     def test_linux_documentado_no_readme(self):
         readme = self.ler("README.md")

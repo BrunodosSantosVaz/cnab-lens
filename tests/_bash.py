@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Localiza um bash utilizável para os testes dos scripts (.github/scripts/*.sh)."""
 import os
 import shutil

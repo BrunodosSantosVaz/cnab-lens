@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """criar-branches.sh: tarefas com milestone ganham branch; sem milestone só as `sem-executavel` que
 estão numa Sprint (sprint sem versão). `gh` e `projeto.sh` de mentira registram as chamadas."""
 import json
@@ -76,7 +75,7 @@ class CriarBranches(unittest.TestCase):
 
     def branches(self):
         with open(os.path.join(self.fix, "chamadas.log"), encoding="utf-8") as f:
-            return [l.split("ref=refs/heads/")[1].split()[0] for l in f if "ref=refs/heads/" in l]
+            return [linha.split("ref=refs/heads/")[1].split()[0] for linha in f if "ref=refs/heads/" in linha]
 
     def test_milestone_e_sem_executavel_na_sprint_ganham_branch(self):
         self.tarefa(40, "Layout novo", milestone="v0.3.0")

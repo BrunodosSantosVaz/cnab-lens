@@ -62,6 +62,19 @@ jobs:
         run: python -m unittest -v test_pr_regras test_conferir_release test_tarefas_do_epico test_slug test_mesclar test_sem_executavel test_promover_release test_publicar_producao test_atualizar_release test_build_exe test_build_linux test_projeto_sprint test_muda_programa test_iniciar_sprint test_criar_branches test_integrar_release test_apagar_release test_encerrar_sprint test_versao
 
 
+  # Estilo e qualidade do codigo com o Ruff, nas regras do pyproject.toml ([tool.ruff]).
+  lint:
+    name: lint (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install "ruff>=0.6,<1"
+      - name: Ruff
+        run: ruff check . --output-format=github
+
   # Compila o executavel Linux como na release candidata (container manylinux_2_28, glibc 2.28, Python
   # 3.12 portatil do uv com Tk), para achar problema de build antes da release. Nao e gate obrigatorio.
   linux:

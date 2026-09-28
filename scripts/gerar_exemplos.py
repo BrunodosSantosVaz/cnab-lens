@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Gera os arquivos de exemplo em exemplos/ (100% fictícios) para todos os layouts.
 
     python scripts/gerar_exemplos.py
@@ -13,12 +12,12 @@ import sys
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(RAIZ, "src"))
 
-import cnab400_layout as febraban          # noqa: E402
-import cnab400_layout_sicredi as sicredi   # noqa: E402
-import cnab400_layout_sicoob as sicoob400  # noqa: E402
-import cnab400_layout_santander as santander400  # noqa: E402
-import cnab240_layout_santander as santander240  # noqa: E402
-import cnab240_layout_sicoob as sicoob240  # noqa: E402
+from cnablens.layouts import febraban400 as febraban     # noqa: E402
+from cnablens.layouts import santander240             # noqa: E402
+from cnablens.layouts import santander400             # noqa: E402
+from cnablens.layouts import sicoob240                # noqa: E402
+from cnablens.layouts import sicoob400                # noqa: E402
+from cnablens.layouts import sicredi400 as sicredi    # noqa: E402
 
 SAIDA = os.path.join(RAIZ, "exemplos")
 EMPRESA = "EMPRESA EXEMPLO LTDA"
@@ -130,7 +129,8 @@ def sicoob400_arquivo(tipo):
         "Identificação do Banco": "756BANCOOBCED", "Data da Gravação": "210926", "Sequencial da Remessa": "1",
         "Número Sequencial": "1"})
     if ret:
-        h = pos(h, 77, "756BANCOOBCED"); h = pos(h, 95, "210926")
+        h = pos(h, 77, "756BANCOOBCED")
+        h = pos(h, 95, "210926")
     detalhes = []
     for i, (nome, doc) in enumerate(PAGADORES[:2], 1):
         if ret:
@@ -156,8 +156,11 @@ def sicoob400_arquivo(tipo):
 def sicoob240_arquivo(tipo):
     ret = tipo == "Retorno"
     ha = pos(montar(sicoob240.HEADER_ARQUIVO_RETORNO_FIELDS if ret else sicoob240.HEADER_ARQUIVO_REMESSA_FIELDS, 240, {}), 1, "7560000")
-    ha = pos(ha, 8, "0"); ha = pos(ha, 73, EMPRESA.ljust(30)); ha = pos(ha, 103, "SICOOB".ljust(30))
-    ha = pos(ha, 143, "2" if ret else "1"); ha = pos(ha, 144, "21092026")
+    ha = pos(ha, 8, "0")
+    ha = pos(ha, 73, EMPRESA.ljust(30))
+    ha = pos(ha, 103, "SICOOB".ljust(30))
+    ha = pos(ha, 143, "2" if ret else "1")
+    ha = pos(ha, 144, "21092026")
     hl = pos(montar(sicoob240.HEADER_LOTE_RETORNO_FIELDS if ret else sicoob240.HEADER_LOTE_REMESSA_FIELDS, 240, {}), 1, "7560001")
     hl = pos(hl, 8, "1")
     contador = [0]
@@ -165,7 +168,9 @@ def sicoob240_arquivo(tipo):
     def segmento(campos, letra, valores):
         contador[0] += 1
         ln = montar(campos, 240, valores)
-        ln = pos(ln, 1, "7560001"); ln = pos(ln, 8, "3"); ln = pos(ln, 9, str(contador[0]).rjust(5, "0"))
+        ln = pos(ln, 1, "7560001")
+        ln = pos(ln, 8, "3")
+        ln = pos(ln, 9, str(contador[0]).rjust(5, "0"))
         return pos(ln, 14, letra)
 
     linhas = [ha, hl]
@@ -301,7 +306,9 @@ def santander240_arquivo(tipo):
     def segmento(campos, letra, valores):
         contador[0] += 1
         ln = montar(campos, 240, valores)
-        ln = pos(ln, 1, "0330001"); ln = pos(ln, 8, "3"); ln = pos(ln, 9, str(contador[0]).rjust(5, "0"))
+        ln = pos(ln, 1, "0330001")
+        ln = pos(ln, 8, "3")
+        ln = pos(ln, 9, str(contador[0]).rjust(5, "0"))
         return pos(ln, 14, letra)
 
     linhas = [ha, hl]

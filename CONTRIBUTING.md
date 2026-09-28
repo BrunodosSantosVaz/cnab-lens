@@ -33,8 +33,9 @@ inclui; no Linux, instale o pacote `tk`/`python3-tk` da distro). O programa não
 ```powershell
 git clone https://github.com/BrunodosSantosVaz/cnab-lens.git
 cd cnab-lens
-python src\cnab400_reader.py                       # rodar
+python src\cnablens\__main__.py                    # rodar (ou python -m cnablens com pip install -e .)
 python -m unittest discover -s tests -v            # testes
+uvx ruff check .                                  # estilo (regras no pyproject.toml; roda na CI)
 pip install -r requirements-build.txt              # só para gerar o .exe
 python packaging\windows\build_exe.py             # gera em build-local/ (ignorada pelo Git)
 ```
