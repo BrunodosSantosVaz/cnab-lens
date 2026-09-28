@@ -6,9 +6,8 @@ import tempfile
 import unittest
 
 import _caminho  # noqa: F401
-from cnablens import app as reader
-
-
+from cnablens.formatacao import format_data, format_valor_monetario
+from cnablens.leitura import CnabFile
 def valor_em(registro, inicio):
     """Valor do campo que começa na posição `inicio` (os nomes de campo podem se repetir dentro de um registro)."""
     return next(f["valor"] for f in registro.fields if f["inicio"] == inicio)
@@ -52,7 +51,7 @@ class ArquivoTemporario(unittest.TestCase):
         with os.fdopen(fd, "w", encoding="latin-1", newline="") as f:
             f.write("\r\n".join(linhas) + "\r\n")
         self.addCleanup(os.remove, caminho)
-        cf = reader.CnabFile(caminho)  # o layout vem do banco do Header (033)
+        cf = CnabFile(caminho)  # o layout vem do banco do Header (033)
         if layout:
             cf.apply_layout(layout)
         return cf
@@ -93,8 +92,8 @@ class RemessaSantander240(ArquivoTemporario):
         self.assertEqual(valor_em(y03, 81), "1")  # tipo de chave
         self.assertEqual(valor_em(y03, 82), "chave-pix-ficticia")
         self.assertEqual(valor_em(y03, 159), self.TXID)
-        self.assertEqual(reader.format_data(primeiro.get("Data de Vencimento")), "25/10/2026")
-        self.assertEqual(reader.format_valor_monetario(primeiro.get("Valor Nominal")), "159,90")
+        self.assertEqual(format_data(primeiro.get("Data de Vencimento")), "25/10/2026")
+        self.assertEqual(format_valor_monetario(primeiro.get("Valor Nominal")), "159,90")
         self.assertEqual(primeiro.get("Número do Documento"), "NF-1001")
         self.assertEqual(primeiro.get("Código de Movimento"), "01")
         self.assertEqual(primeiro.get("Nome do Pagador"), "CLIENTE FICTICIO")
@@ -166,8 +165,8 @@ class RetornoSantander240(ArquivoTemporario):
     def test_resumo_de_retorno(self):
         grupo = self.arquivo().detalhes[0]
         self.assertEqual(grupo.get("Código de Movimento"), "06")
-        self.assertEqual(reader.format_data(grupo.get("Data de Vencimento")), "25/10/2026")
-        self.assertEqual(reader.format_valor_monetario(grupo.get("Pago")), "159,90")
+        self.assertEqual(format_data(grupo.get("Data de Vencimento")), "25/10/2026")
+        self.assertEqual(format_valor_monetario(grupo.get("Pago")), "159,90")
 
     def test_descricao_do_movimento_vem_da_tabela_de_retorno(self):
         cf = self.arquivo()

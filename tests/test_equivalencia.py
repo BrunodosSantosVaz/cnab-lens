@@ -17,8 +17,9 @@ import unittest
 
 import _caminho
 
-from cnablens.app import CnabFile, formatar_valor_campo
+from cnablens.formatacao import formatar_valor_campo
 from cnablens.layouts import LAYOUT_ORDER, LAYOUTS
+from cnablens.leitura import CnabFile
 
 RETRATO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dados", "equivalencia.json.gz")
 

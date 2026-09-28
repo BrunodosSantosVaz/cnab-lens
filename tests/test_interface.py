@@ -7,9 +7,7 @@ import unittest
 from unittest import mock
 
 import _caminho
-from cnablens import app
-
-
+from cnablens.interface import app
 class Evento:
     """Evento mínimo para chamar os handlers diretamente."""
 

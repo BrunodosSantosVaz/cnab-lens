@@ -7,7 +7,7 @@ import unittest
 from unittest import mock
 
 import _caminho  # noqa: F401
-from cnablens import app
+from cnablens.interface import app
 import test_leitura_santander240 as t240
 import test_leitura_santander400 as t400
 

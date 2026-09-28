@@ -6,9 +6,8 @@ import tempfile
 import unittest
 
 import _caminho  # noqa: F401
-from cnablens import app as reader
-
-
+from cnablens.formatacao import format_data, format_valor_monetario
+from cnablens.leitura import CnabFile, CnabRecord
 def linha(*pares, largura=400):
     buf = [" "] * largura
     for inicio, valor in pares:
@@ -52,7 +51,7 @@ class ArquivoTemporario(unittest.TestCase):
         with os.fdopen(fd, "w", encoding="latin-1", newline="") as f:
             f.write("\r\n".join(linhas) + "\r\n")
         self.addCleanup(os.remove, caminho)
-        return reader.CnabFile(caminho)
+        return CnabFile(caminho)
 
 
 class RemessaSantander(ArquivoTemporario):
@@ -99,8 +98,8 @@ class RemessaSantander(ArquivoTemporario):
 
     def test_resumo_da_grade_le_o_registro_1(self):
         primeiro = self.arquivo().detalhes[0]
-        self.assertEqual(reader.format_data(primeiro.get("Data de Vencimento")), "25/10/2026")
-        self.assertEqual(reader.format_valor_monetario(primeiro.get("Valor Nominal")), "159,90")
+        self.assertEqual(format_data(primeiro.get("Data de Vencimento")), "25/10/2026")
+        self.assertEqual(format_valor_monetario(primeiro.get("Valor Nominal")), "159,90")
         self.assertEqual(primeiro.get("Número do Documento"), "NF-1001")
         self.assertEqual(primeiro.get("Código de Movimento"), "01")
         self.assertEqual(primeiro.get("Nome do Pagador"), "CLIENTE FICTICIO")
@@ -115,7 +114,7 @@ class RemessaSantander(ArquivoTemporario):
         cf = self.arquivo()
         cf.apply_layout("febraban")
         self.assertEqual(len(cf.detalhes), 2)
-        self.assertTrue(all(isinstance(r, reader.CnabRecord) for r in cf.detalhes))
+        self.assertTrue(all(isinstance(r, CnabRecord) for r in cf.detalhes))
         extras = [r for r in cf.records if r.tipo_char in ("8", "2")]
         self.assertTrue(all(r.tipo_label.startswith("Desconhecido") for r in extras))
         cf.apply_layout("santander400")
@@ -163,8 +162,8 @@ class RetornoSantander(ArquivoTemporario):
     def test_resumo_de_retorno(self):
         grupo = self.arquivo().detalhes[0]
         self.assertEqual(grupo.get("Código de Movimento"), "06")
-        self.assertEqual(reader.format_valor_monetario(grupo.get("Pago")), "159,90")
-        self.assertEqual(reader.format_data(grupo.get("Data de Vencimento")), "25/10/2026")
+        self.assertEqual(format_valor_monetario(grupo.get("Pago")), "159,90")
+        self.assertEqual(format_data(grupo.get("Data de Vencimento")), "25/10/2026")
 
     def test_descricao_do_movimento_vem_da_tabela_do_retorno(self):
         cf = self.arquivo()
