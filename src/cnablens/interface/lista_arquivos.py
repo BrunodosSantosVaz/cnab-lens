@@ -104,10 +104,14 @@ class FileListPanel(ttk.Frame):
         self.tree.column("modificado", width=96, anchor="center", stretch=False)
         configure_zebra_tags(self.tree)
 
-        vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=vsb.set)
-        self.tree.pack(side="left", fill="both", expand=True)
-        vsb.pack(side="right", fill="y")
+        self.vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.vsb.set)
+        # grid (e não pack): a coluna da barra é reservada antes, então ela aparece desde a abertura
+        # mesmo com o painel estreito. Com pack, o Treeview empacotado primeiro tomava toda a largura.
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        self.vsb.grid(row=0, column=1, sticky="ns")
+        tree_frame.grid_rowconfigure(0, weight=1)
+        tree_frame.grid_columnconfigure(0, weight=1)
 
         self.tree.bind("<<TreeviewSelect>>", self._on_row_select)
 
