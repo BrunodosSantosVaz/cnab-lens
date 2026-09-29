@@ -6,6 +6,7 @@ from tkinter import messagebox, ttk
 
 from cnablens.interface.dica import DicaDaColuna
 from cnablens.interface.estilo import configure_zebra_tags, zebra_tags
+from cnablens.interface.rolagem import ligar_roda_do_mouse
 from cnablens.leitura.pasta import escanear_pasta, peek_tipo_arquivo
 
 
@@ -104,6 +105,7 @@ class FileListPanel(ttk.Frame):
         self.tree.column("tipo", width=56, anchor="center", stretch=False)
         self.tree.column("modificado", width=96, anchor="center", stretch=False)
         configure_zebra_tags(self.tree)
+        ligar_roda_do_mouse(self.tree)
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
