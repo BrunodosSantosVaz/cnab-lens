@@ -6,6 +6,18 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Não lançado]
 
+## [0.4.0] - 2026-09-29
+
+### Adicionado
+- CNAB400 Santander: detalhar Header, Movimento (remessa e retorno) e Trailer (#89)
+- CNAB400 Santander: detalhar os registros opcionais (QR Code/PIX nos registros 8 e 2, mensagens 2 e 4-7) (#90)
+- CNAB240 Santander: detalhar Headers de Arquivo/Lote e Segmentos P, Q, R, S (remessa) (#91)
+- CNAB240 Santander: detalhar Segmentos T, U, Y (retorno) e os Trailers (#92)
+- Corrigir a barra de rolagem da lista de arquivos escondida por padrão (ordem de `pack`) (#93)
+- Rolagem pela roda do mouse funcionando na lista de arquivos e no painel de campos, em Windows e Linux (#94)
+- Nome de arquivo comprido legível na lista (tooltip com o nome completo, ou barra de rolagem horizontal) (#95)
+- Menu Ajuda → Sobre com nome, versão, descrição, autor, licença e link do repositório (#96)
+
 ## [0.3.0] - 2026-09-28
 
 ### Adicionado
