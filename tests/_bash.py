@@ -15,7 +15,7 @@ def achar_bash():
 
 BASH = achar_bash()
 GIT = shutil.which("git")
-# Os scripts do processo rodam no Linux das Actions (ubuntu-latest). No Windows (git/arquivos presos,
+# Os scripts do processo rodam no Linux das Actions (ubuntu-24.04). No Windows (git/arquivos presos,
 # python3 ausente no Git Bash) esses testes são pulados: o job "scripts (Linux)" do CI os executa.
 USAVEL = bool(BASH and GIT) and os.name != "nt"
 

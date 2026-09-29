@@ -34,11 +34,11 @@ concurrency:
 jobs:
   mover:
     if: ${{ vars.PROJETO_OWNER != '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Em PR, os scripts vem da branch de destino (nao do PR): o PR nao consegue
       # alterar o script que roda com o token dos paineis.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
       - name: Mover cartoes

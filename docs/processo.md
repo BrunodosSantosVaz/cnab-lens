@@ -422,6 +422,10 @@ no Planejamento. Se o épico ainda tem tarefas abertas, segue em *Em desenvolvim
 | `Build de tarefa` | merge na `develop` | artefato temporário para testar a tarefa |
 | `Ver painéis` | **botão** | somente leitura: lista as issues abertas de cada coluna dos três painéis no log e no resumo da execução |
 
+Os jobs Linux rodam em `ubuntu-24.04` fixo (não em `ubuntu-latest`, que muda de sistema sozinho) e as actions
+ficam em versões que rodam em Node 24; o teste `tests/test_workflows_versoes.py` falha se um workflow fugir disso.
+Trocar de Ubuntu ou subir uma action é decisão de uma tarefa própria, validada rodando os workflows.
+
 Os botões rodam pela aba **Actions** ou por
 `gh workflow run <arquivo>.yml -f versao=v0.2.0 -f simular=false` (sprint sem versão: sem o `-f versao`).
 **Rode antes com `simular=true`**

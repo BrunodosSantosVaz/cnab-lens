@@ -19,8 +19,8 @@ jobs:
     name: check
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Sintaxe
@@ -41,8 +41,8 @@ jobs:
       matrix:
         python: ['3.10', '3.13']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - name: Testes
@@ -51,10 +51,10 @@ jobs:
   # Testes dos scripts do processo (bash + git) no Linux, onde eles de fato rodam nas Actions.
   scripts:
     name: scripts (Linux)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Testes dos scripts
@@ -65,10 +65,10 @@ jobs:
   # Estilo e qualidade do codigo com o Ruff, nas regras do pyproject.toml ([tool.ruff]).
   lint:
     name: lint (Ruff)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install "ruff>=0.6,<1"
@@ -79,10 +79,10 @@ jobs:
   # 3.12 portatil do uv com Tk), para achar problema de build antes da release. Nao e gate obrigatorio.
   linux:
     name: build (Linux)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Python 3.12 portatil com Tk (uv)
         run: |
           /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv

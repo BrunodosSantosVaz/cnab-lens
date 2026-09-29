@@ -36,10 +36,10 @@ jobs:
       versao: ${{ steps.v.outputs.versao }}
       n: ${{ steps.v.outputs.n }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0   # precisa das tags para numerar a candidata
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Versao e numero da candidata
@@ -70,12 +70,12 @@ jobs:
         run: python packaging/windows/build_exe.py --rc ${{ steps.v.outputs.n }} --saida rc
       - name: Atestar procedencia
         if: steps.v.outputs.pular != 'true'
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: rc/*.exe
       - name: Guardar o .exe para a pre-release
         if: steps.v.outputs.pular != 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: candidata-windows
           path: rc/
@@ -84,10 +84,10 @@ jobs:
   linux:
     needs: candidata
     if: ${{ needs.candidata.outputs.pular != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Python 3.12 portatil com Tk (uv)
         run: |
           /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv
@@ -99,7 +99,7 @@ jobs:
           /tmp/venv/bin/python packaging/linux/build_linux.py --rc ${{ needs.candidata.outputs.n }} --saida rc-linux
           mv rc-linux/SHA256SUMS.txt rc-linux/SHA256SUMS-linux.txt
       - name: Guardar o executavel Linux para a pre-release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: candidata-linux
           path: rc-linux/
@@ -107,11 +107,11 @@ jobs:
 
   publicar:
     needs: [candidata, linux]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       rc_tag: ${{ steps.criar.outputs.rc_tag }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: rc
           merge-multiple: true
@@ -157,13 +157,13 @@ jobs:
   homologar:
     needs: publicar
     if: ${{ needs.publicar.outputs.rc_tag != '' && startsWith(github.ref_name, 'release/') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       pull-requests: write
       issues: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           # PAT do dono (admin): empurra na develop (protegida por ruleset) e dispara a CI dela.

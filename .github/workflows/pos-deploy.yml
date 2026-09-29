@@ -29,9 +29,9 @@ jobs:
       && github.event.workflow_run.conclusion == 'success'
       && github.event.workflow_run.event == 'push'
       && github.event.workflow_run.head_branch == (vars.BRANCH_MAIN || 'main') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ vars.BRANCH_MAIN || 'main' }}
           fetch-depth: 0
