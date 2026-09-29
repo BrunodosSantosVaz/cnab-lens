@@ -14,6 +14,7 @@ from cnablens.formatacao import DATA_KEYWORDS, MOEDA_KEYWORDS, format_data, form
 from cnablens.interface.estilo import configure_zebra_tags, zebra_tags
 from cnablens.interface.lista_arquivos import FileListPanel
 from cnablens.interface.painel_campos import DetailPanel
+from cnablens.interface.sobre import SobreDialog
 from cnablens.leitura import CnabFile
 from cnablens.version import __version__
 
@@ -47,8 +48,14 @@ class App(tk.Tk):
         arquivo_menu.add_separator()
         arquivo_menu.add_command(label="Sair", command=self.destroy)
         menubar.add_cascade(label="Arquivo", menu=arquivo_menu)
+        ajuda_menu = tk.Menu(menubar, tearoff=0)
+        ajuda_menu.add_command(label="Sobre...", command=self.mostrar_sobre)
+        menubar.add_cascade(label="Ajuda", menu=ajuda_menu)
         self.config(menu=menubar)
         self.bind_all("<Control-o>", lambda e: self.abrir_pasta())
+
+    def mostrar_sobre(self):
+        SobreDialog(self, TITULO_APP).mostrar()
 
     def _build_layout(self):
         # A janela toda usa grid (não pack) nas 4 faixas principais, pra
