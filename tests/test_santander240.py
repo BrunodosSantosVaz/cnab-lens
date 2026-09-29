@@ -142,10 +142,8 @@ class Segmentos(Base):
         self.confere(y04, 18, 19, "identificação registro")
         self.confere(y04, 20, 53, "cheque 1")
         self.confere(y04, 190, 223, "cheque 6")
-        for lista, codigo in ((y03, "03"), (y53, "53")):
+        for lista, codigo in ((y03, "03"), (y53, "53"), (r03, "03"), (y04, "04")):
             self.assertIn(f"'{codigo}'", campo_em(lista, 18)[3])  # o sub-código do Segmento Y
-        for lista, codigo in ((r03, "03"), (y04, "04")):
-            self.assertIn(f"conteúdo no manual: {codigo}", campo_em(lista, 18)[3])
 
     def test_registros_e_segmentos_mapeados(self):
         self.assertEqual(sorted(s.SEGMENTOS), [("Remessa", "P"), ("Remessa", "Q"), ("Remessa", "R"), ("Remessa", "S-1"),

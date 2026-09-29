@@ -345,7 +345,7 @@ DETAIL_RETORNO_FIELDS = [
     ("Código da agência recebedora do boleto", 169, 173,
      "Agência que recebeu o pagamento do boleto."),
     ("Espécie do boleto", 174, 175,
-     "Espécie (tipo de documento) do boleto: '01' DM Duplicata Mercantil, '02' NP Nota Promissória, '03' AP Apólice de Seguro, '05' RC Recibo, '06' DS Duplicata de Serviço, '07' LC Letra de Câmbio, '08' BDP Boleto de Proposta, '19' BCC Boleto de Cartão de Crédito, '33' BDA Boleto de Depósito e Aporte (ver ESPECIE_BOLETO_CODES). (nota 24)"),
+     "Espécie (tipo de documento) do boleto: '01' DM Duplicata Mercantil, '02' NP Nota Promissória, '03' AP Apólice de Seguro, '05' RC Recibo, '06' DS Duplicata de Serviço, '07' LC Letra de Câmbio, '08' BDP Boleto de Proposta, '19' BCC Boleto de Cartão de Crédito, '33' BDA Boleto de Depósito e Aporte (ver ESPECIE_BOLETO_CODES; nota 24)."),
     ("Valor da tarifa cobrada", 176, 188,
      "Valor da tarifa cobrada pelo banco neste evento, com 2 casas decimais sem vírgula."),
     ("Valor de outras despesas", 189, 201,
