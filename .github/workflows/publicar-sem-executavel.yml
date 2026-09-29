@@ -39,9 +39,9 @@ env:
 
 jobs:
   conferir:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ vars.BRANCH_MAIN || 'main' }}
           fetch-depth: 0
@@ -54,10 +54,10 @@ jobs:
   publicar:
     needs: conferir
     if: ${{ !inputs.simular }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: producao
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ vars.BRANCH_MAIN || 'main' }}
           fetch-depth: 0

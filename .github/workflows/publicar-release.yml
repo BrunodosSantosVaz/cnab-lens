@@ -29,10 +29,10 @@ jobs:
   publicar:
     # ignora os commits automaticos de release (merge feito pela acao "Publicar em producao")
     if: "${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: producao
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Conferir a release candidata
