@@ -6,6 +6,7 @@ from tkinter import ttk
 
 from cnablens.formatacao import DATA_KEYWORDS, MOEDA_KEYWORDS, formatar_valor_campo
 from cnablens.interface.estilo import configure_zebra_tags, zebra_tags
+from cnablens.interface.rolagem import ligar_roda_do_mouse
 
 
 class DetailPanel(ttk.Frame):
@@ -64,6 +65,7 @@ class DetailPanel(ttk.Frame):
         self.text.bind("<Control-a>", self._select_all)
         self.text.bind("<Control-A>", self._select_all)
         self.text.bind("<Double-Button-1>", self._on_double_click)
+        ligar_roda_do_mouse(self.text)
         for seq in ("<Button-1>", "<B1-Motion>", "<Double-Button-1>", "<Triple-Button-1>"):
             self.head.bind(seq, lambda e: "break")
         self._render_header(self.TABS_PADRAO)
