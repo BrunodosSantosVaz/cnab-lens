@@ -4,6 +4,7 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, ttk
 
+from cnablens.interface.dica import DicaDaColuna
 from cnablens.interface.estilo import configure_zebra_tags, zebra_tags
 from cnablens.leitura.pasta import escanear_pasta, peek_tipo_arquivo
 
@@ -110,6 +111,7 @@ class FileListPanel(ttk.Frame):
         vsb.pack(side="right", fill="y")
 
         self.tree.bind("<<TreeviewSelect>>", self._on_row_select)
+        self.dica = DicaDaColuna(self.tree, "nome")  # nome comprido, cortado na coluna: mostra inteiro
 
     # -- carregamento -----------------------------------------------------
 
