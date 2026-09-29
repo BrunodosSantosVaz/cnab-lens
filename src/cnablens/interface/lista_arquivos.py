@@ -4,7 +4,9 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, ttk
 
+from cnablens.interface.dica import DicaDaColuna
 from cnablens.interface.estilo import configure_zebra_tags, zebra_tags
+from cnablens.interface.rolagem import ligar_roda_do_mouse
 from cnablens.leitura.pasta import escanear_pasta, peek_tipo_arquivo
 
 
@@ -103,13 +105,19 @@ class FileListPanel(ttk.Frame):
         self.tree.column("tipo", width=56, anchor="center", stretch=False)
         self.tree.column("modificado", width=96, anchor="center", stretch=False)
         configure_zebra_tags(self.tree)
+        ligar_roda_do_mouse(self.tree)
 
-        vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=vsb.set)
-        self.tree.pack(side="left", fill="both", expand=True)
-        vsb.pack(side="right", fill="y")
+        self.vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.vsb.set)
+        # grid (e não pack): a coluna da barra é reservada antes, então ela aparece desde a abertura
+        # mesmo com o painel estreito. Com pack, o Treeview empacotado primeiro tomava toda a largura.
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        self.vsb.grid(row=0, column=1, sticky="ns")
+        tree_frame.grid_rowconfigure(0, weight=1)
+        tree_frame.grid_columnconfigure(0, weight=1)
 
         self.tree.bind("<<TreeviewSelect>>", self._on_row_select)
+        self.dica = DicaDaColuna(self.tree, "nome")  # nome comprido, cortado na coluna: mostra inteiro
 
     # -- carregamento -----------------------------------------------------
 
