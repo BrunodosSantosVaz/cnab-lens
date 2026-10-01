@@ -19,8 +19,8 @@ jobs:
     name: check
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Sintaxe
@@ -41,8 +41,8 @@ jobs:
       matrix:
         python: ['3.10', '3.13']
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
       - name: Testes
@@ -53,8 +53,8 @@ jobs:
     name: scripts (Linux)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Testes dos scripts
@@ -67,8 +67,8 @@ jobs:
     name: lint (Ruff)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: pip install "ruff>=0.6,<1"
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Python 3.12 portatil com Tk (uv)
         run: |
           /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv
