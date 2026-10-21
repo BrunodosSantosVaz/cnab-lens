@@ -37,7 +37,7 @@ class Pyproject(unittest.TestCase):
     def test_python_minimo_igual_ao_do_readme(self):
         with open(os.path.join(_caminho.RAIZ, "README.md"), encoding="utf-8") as f:
             readme = f.read()
-        minimo = re.search(r"python-(\d+\.\d+)%2B", readme).group(1)
+        minimo = re.search(r"python-(\d+\.\d+)%2B", readme, re.IGNORECASE).group(1)
         self.assertEqual(self.projeto["requires-python"], f">={minimo}")
 
     def test_sem_dependencias_duplicadas(self):
