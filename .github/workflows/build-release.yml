@@ -36,10 +36,10 @@ jobs:
       versao: ${{ steps.v.outputs.versao }}
       n: ${{ steps.v.outputs.n }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # precisa das tags para numerar a candidata
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Versao e numero da candidata
@@ -70,12 +70,12 @@ jobs:
         run: python packaging/windows/build_exe.py --rc ${{ steps.v.outputs.n }} --saida rc
       - name: Atestar procedencia
         if: steps.v.outputs.pular != 'true'
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: rc/*.exe
       - name: Guardar o .exe para a pre-release
         if: steps.v.outputs.pular != 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: candidata-windows
           path: rc/
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Python 3.12 portatil com Tk (uv)
         run: |
           /opt/python/cp312-cp312/bin/python -m pip install -q --root-user-action=ignore uv
@@ -99,7 +99,7 @@ jobs:
           /tmp/venv/bin/python packaging/linux/build_linux.py --rc ${{ needs.candidata.outputs.n }} --saida rc-linux
           mv rc-linux/SHA256SUMS.txt rc-linux/SHA256SUMS-linux.txt
       - name: Guardar o executavel Linux para a pre-release
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: candidata-linux
           path: rc-linux/
@@ -111,7 +111,7 @@ jobs:
     outputs:
       rc_tag: ${{ steps.criar.outputs.rc_tag }}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           path: rc
           merge-multiple: true
@@ -163,7 +163,7 @@ jobs:
       pull-requests: write
       issues: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # PAT do dono (admin): empurra na develop (protegida por ruleset) e dispara a CI dela.
