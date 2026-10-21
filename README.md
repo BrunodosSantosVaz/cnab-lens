@@ -275,7 +275,7 @@ cnab-lens/
 │   ├── __main__.py            Ponto de entrada (python -m cnablens)
 │   ├── version.py             Versão do programa
 │   ├── formatacao.py          Valores em R$, datas e valor de tela
-│   ├── leitura/               CnabFile, Leitor400, Leitor240, registros e pasta
+│   ├── leitura/               CnabFile, leitor400.py, leitor240.py, registros e pasta
 │   ├── layouts/               base, bancos e um módulo por layout
 │   └── interface/             Janela, painel de campos, lista de arquivos e estilo
 ├── tests/                     Testes automatizados (unittest)
